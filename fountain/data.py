@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+
+import os.path
+from utils import *
+from contextlib import contextmanager
+
+DATA_PATH = "/Users/yk/data"
+
+
+@contextmanager
+def sub_path(path):
+    global DATA_PATH
+    _old_dp = DATA_PATH
+    DATA_PATH = os.path.join(_old_dp, path)
+    os.makedirs(DATA_PATH, mode=0o755, exist_ok=True)  # noqa
+    yield
+    DATA_PATH = _old_dp
+
+
+class File:
+    def __init__(self, name, dependencies=None):
+        self.name = name
+        self.path = os.path.join(DATA_PATH, self.name)
+        self.dependencies = dependencies or []
+
+    def exists(self):
+        return os.path.exists(self.path)
+
+    def last_modified(self):
+        return os.path.getmtime(self.path)
+
+    def update(self):
+        raise Exception('Not Implemented')
+
+    def ensure_updated(self, min_mtime=0.):
+        dep_mtimes = [dep.ensure_updated(min_mtime) for dep in self.dependencies] + [0.]
+        if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)):
+            print('updating {}'.format(self.name))
+            self.update()
+        return self.last_modified()
+
+
+class OnlineFile(File):
+    def __init__(self, name, url):
+        super().__init__(name)
+        self.url = url
+
+    def update(self):
+        download_file(self.url, self.path)
+
+
+class TaredFile(File):
+    def __init__(self, name, tarfile):
+        super().__init__(name, [tarfile])
+        self.tarfile = tarfile
+
+    def update(self):
+        untar_file(self.tarfile.path, self.name)
+
+
+class ZippedFile(File):
+    def __init__(self, name, zipfile):
+        super().__init__(name, [zipfile])
+        self.zipfile = zipfile
+
+    def update(self):
+        unzip_file(self.zipfile.path, self.name)
+
+
+class GzippedFile(File):
+    def __init__(self, name, gzipfile):
+        super().__init__(name, [gzipfile])
+        self.gzipfile = gzipfile
+
+    def update(self):
+        gunzip_file(self.gzipfile.path, self.path)
+
+
+class Dataset:
+    def __init__(self):
+        pass
+
+    def name(self):
+        return type(self).__name__
+
+    def files(self):
+        raise Exception('Not Implemented')
+
+    def ensure_updated(self, min_mtime=0.):
+        for f in self.files():
+            f.ensure_updated(min_mtime)
+
+    def get_data(self):
+        self.ensure_updated()
+        return self.get_data_raw()
+
+    def get_data_raw(self):
+        raise Exception('Not Implemented')
+
+
+if __name__ == '__main__':
+    imdb = File('imdb.tar.gz')
+    print(imdb.path)
+    print(imdb.exists())
+    print(imdb.last_modified())
+    print(imdb.ensure_updated())
+    try:
+        print(imdb.ensure_updated(14571019940))
+        print('This should not happen')
+    except:
+        pass
