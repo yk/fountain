@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os.path
-from utils import *
+from fountain.utils import *
 from contextlib import contextmanager
 
 DATA_PATH = "/Users/yk/data"

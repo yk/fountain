@@ -1,4 +1,4 @@
-from data import *
+from fountain.data import *
 import numpy as np
 import pickle
 

@@ -1,4 +1,6 @@
-from data import *
+#!/usr/bin/env python3
+
+from fountain.data import *
 import numpy as np
 from scipy.io import loadmat
 
@@ -27,7 +29,7 @@ class SVHN2(Dataset):
                 transp = (0, 1)
             else:
                 key = 'X'
-                transp = (3, 2, 1, 0)
+                transp = (3, 1, 0, 2)
             data = np.concatenate([loadmat(f.path)[key].transpose(transp) for f in self.dependencies if f.name.endswith('.mat')])
 
             if self.isLabels:
