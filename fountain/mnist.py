@@ -52,7 +52,7 @@ class MNIST(Dataset):
             for i in range(size):
                 images[i][:] = image_data[i * rows * cols:(i + 1) * rows * cols]
 
-            return (np.array(images).reshape((size, 1, rows, cols)) / 255).astype(np.float32)
+            return (np.array(images).reshape((size, rows, cols, 1)) / 255).astype(np.float32)
 
         def update(self):
             if self.isLabels:
