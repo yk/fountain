@@ -4,7 +4,7 @@ import os.path
 from fountain.utils import *
 from contextlib import contextmanager
 
-DATA_PATH = "/Users/yk/data"
+DATA_PATH = os.path.expanduser("~/data")
 
 
 @contextmanager
