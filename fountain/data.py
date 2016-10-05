@@ -3,8 +3,11 @@
 import os.path
 from fountain.utils import *
 from contextlib import contextmanager
+import logging
+import time
 
-DATA_PATH = os.path.expanduser("~/data")
+BASE_DATA_PATH = os.path.expanduser("~/data")
+DATA_PATH = BASE_DATA_PATH
 
 
 @contextmanager
@@ -15,6 +18,21 @@ def sub_path(path):
     os.makedirs(DATA_PATH, mode=0o755, exist_ok=True)  # noqa
     yield
     DATA_PATH = _old_dp
+
+
+def wait_for_unlocked():
+    logging.debug('waiting for data path to be unlocked')
+    while os.path.exists(os.path.join(BASE_DATA_PATH, 'lock')):
+        time.sleep(1)
+
+
+@contextmanager
+def data_lock():
+    lockpath = os.path.join(BASE_DATA_PATH, 'lock'
+    with open(lockpath), 'w') as f:
+        f.write('locked')
+    yield
+    os.remove(lockpath)
 
 
 class File:
@@ -34,9 +52,11 @@ class File:
 
     def ensure_updated(self, min_mtime=0.):
         dep_mtimes = [dep.ensure_updated(min_mtime) for dep in self.dependencies] + [0.]
+        wait_for_unlocked()
         if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)):
             print('updating {}'.format(self.name))
-            self.update()
+            with data_lock():
+                self.update()
         return self.last_modified()
 
 
