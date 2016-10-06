@@ -32,7 +32,10 @@ def data_lock():
     with open(lockpath, 'w') as f:
         f.write('locked')
     yield
-    os.remove(lockpath)
+    try:
+        os.remove(lockpath)
+    except:
+        pass
 
 
 class File:
