@@ -29,7 +29,7 @@ def wait_for_unlocked():
 @contextmanager
 def data_lock():
     lockpath = os.path.join(BASE_DATA_PATH, 'lock')
-    with open(lockpath), 'w') as f:
+    with open(lockpath, 'w') as f:
         f.write('locked')
     yield
     os.remove(lockpath)
