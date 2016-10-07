@@ -5,6 +5,7 @@ from fountain.utils import *
 from contextlib import contextmanager
 import logging
 import time
+from filelock import FileLock
 
 BASE_DATA_PATH = os.path.expanduser("~/data")
 DATA_PATH = BASE_DATA_PATH
@@ -20,22 +21,25 @@ def sub_path(path):
     DATA_PATH = _old_dp
 
 
-def wait_for_unlocked():
-    logging.debug('waiting for data path to be unlocked')
-    while os.path.exists(os.path.join(BASE_DATA_PATH, 'lock')):
-        time.sleep(1)
+# def wait_for_unlocked():
+    # logging.debug('waiting for data path to be unlocked')
+    # while os.path.exists(os.path.join(BASE_DATA_PATH, 'lock')):
+        # time.sleep(1)
 
 
-@contextmanager
-def data_lock():
-    lockpath = os.path.join(BASE_DATA_PATH, 'lock')
-    with open(lockpath, 'w') as f:
-        f.write('locked')
-    yield
-    try:
-        os.remove(lockpath)
-    except:
-        pass
+# @contextmanager
+# def data_lock():
+    # lockpath = os.path.join(BASE_DATA_PATH, 'lock')
+    # with open(lockpath, 'w') as f:
+        # f.write('locked')
+    # yield
+    # try:
+        # os.remove(lockpath)
+    # except:
+        # pass
+
+data_lock = FileLock(os.path.join(BASE_DATA_PATH, 'lock'))
+
 
 
 class File:
@@ -55,10 +59,11 @@ class File:
 
     def ensure_updated(self, min_mtime=0.):
         dep_mtimes = [dep.ensure_updated(min_mtime) for dep in self.dependencies] + [0.]
-        wait_for_unlocked()
-        if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)):
-            print('updating {}'.format(self.name))
-            with data_lock():
+        # wait_for_unlocked()
+        with data_lock:
+            if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)):
+                print('updating {}'.format(self.name))
+                # with data_lock():
                 self.update()
         return self.last_modified()
 
