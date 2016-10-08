@@ -33,12 +33,12 @@ class SVHN2(Dataset):
             data = np.concatenate([loadmat(f.path)[key].transpose(transp) for f in self.dependencies if f.name.endswith('.mat')])
 
             if self.isLabels:
-                data = np.ravel(data) - 1
+                data = np.ravel(data.astype(np.int64)) - 1
             else:
-                data /= 255
+                data = data.astype(np.float32) / 255
 
             np.save(self.path, data)
 
 
 if __name__ == '__main__':
-    print(SVHN2().get_data()[0][:2])
+    print(SVHN2().get_data()[0][:100])
