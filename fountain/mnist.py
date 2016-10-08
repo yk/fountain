@@ -63,4 +63,4 @@ class MNIST(Dataset):
 
 
 if __name__ == '__main__':
-    print(MNIST().get_data()[0].shape)
+    print(np.max(MNIST().get_data()[0][:2]))
