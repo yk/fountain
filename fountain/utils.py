@@ -16,9 +16,11 @@ def touch(fn):
     os.utime(fn, (now, now))
 
 
-def untar_file(fn, entry):
+def untar_file(fn, entry, path):
     with tarfile.open(fn) as tar:
-        tar.extract(entry, os.path.dirname(fn))
+        inf = tar.extractfile(entry)
+        with open(path, 'wb') as f:
+            f.write(inf.read())
 
 
 def unzip_file(fn, entry):

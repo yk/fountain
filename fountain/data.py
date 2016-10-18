@@ -78,12 +78,13 @@ class OnlineFile(File):
 
 
 class TaredFile(File):
-    def __init__(self, name, tarfile):
+    def __init__(self, name, entry, tarfile):
         super().__init__(name, [tarfile])
+        self.entry = entry
         self.tarfile = tarfile
 
     def update(self):
-        untar_file(self.tarfile.path, self.name)
+        untar_file(self.tarfile.path, self.entry, self.path)
 
 
 class ZippedFile(File):
