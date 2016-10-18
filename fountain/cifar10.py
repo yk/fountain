@@ -37,6 +37,7 @@ class CIFAR10(Dataset):
                 data = np.array(data, dtype=np.int32)
             else:
                 data = np.array(data, dtype=np.float32) / 255.
+                data = data.reshape((-1, 3, 32, 32)).transpose((0, 2, 3, 1))
             np.save(self.path, data)
 
 
