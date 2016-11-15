@@ -5,6 +5,7 @@ from fountain.utils import *
 from contextlib import contextmanager
 import logging
 import time
+import numpy as np
 from filelock import FileLock
 
 BASE_DATA_PATH = os.path.expanduser("~/data")
@@ -103,6 +104,16 @@ class GzippedFile(File):
 
     def update(self):
         gunzip_file(self.gzipfile.path, self.path)
+
+
+class CSVFile(File):
+    def __init__(self, name, csvfile, dtype=np.float32):
+        super().__init__(name, [csvfile])
+        self.csvfile = csvfile
+        self.dtype = dtype
+
+    def update(self):
+        np.save(self.path, np.loadtxt(self.csvfile.path, dtype=self.dtype, delimiter=','))
 
 
 class Dataset:
