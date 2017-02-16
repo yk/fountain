@@ -6,7 +6,7 @@ import _pickle as cPickle
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 import itertools as itt
-from fountain.utils import jpg2npy, to_chunks
+from fountain.utils import jpg2npy, to_chunks, get_chunk
 import math
 
 
@@ -45,6 +45,7 @@ class CelebA(Dataset):
             if self.isLabels:
                 with open(self.dependencies[0].path) as f:
                     lines = [l.strip().split()[1:] for l in list(f.readlines())[2:]]
+                    lines = get_chunk(lines, BLOCK_SIZE, self.block)
                 labels = (np.array(lines, dtype=np.int32) + 1) // 2
                 assert np.max(labels) == 1
                 assert np.min(labels) == 0
