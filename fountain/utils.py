@@ -66,4 +66,4 @@ def to_chunks(iterable, chunk_size):
 
 
 def get_chunk(iterable, chunk_size, chunk_number):
-    return next(itt.islice(iterable, chunk_size * chunk_number, chunk_size * (chunk_number + 1)))
+    return list(itt.islice(iterable, chunk_size * chunk_number, chunk_size * (chunk_number + 1)))
