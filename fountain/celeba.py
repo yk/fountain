@@ -11,7 +11,7 @@ import math
 
 
 BLOCK_SIZE = 1000
-TOTAL_IMAGES = 202600
+TOTAL_IMAGES = 202599
 TOTAL_BLOCKS = math.ceil(TOTAL_IMAGES / BLOCK_SIZE)
 
 class CelebA(Dataset):
