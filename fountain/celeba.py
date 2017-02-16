@@ -6,7 +6,7 @@ import _pickle as cPickle
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 import itertools as itt
-from utils import jpg2npy
+from fountain.utils import jpg2npy
 
 
 class CelebA(Dataset):
