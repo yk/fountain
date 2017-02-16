@@ -5,6 +5,8 @@ import zipfile
 import os
 import os.path
 import time
+from PIL import Image
+import numpy as np
 
 
 def download_file(url, fn):
@@ -21,6 +23,11 @@ def untar_file(fn, entry, path):
         inf = tar.extractfile(entry)
         with open(path, 'wb') as f:
             f.write(inf.read())
+
+
+def unzip_all_files(fn):
+    with zipfile.ZipFile(fn) as zf:
+        zf.extractall(os.path.dirname(fn))
 
 
 def unzip_file(fn, entry):
@@ -42,3 +49,8 @@ class Embedder:
 
     def embed(self, key):
         return self.d.get(key, self.default)
+
+
+def jpg2npy(path):
+    img = Image.open(path)
+    return np.array(img)

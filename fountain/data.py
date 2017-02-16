@@ -89,12 +89,16 @@ class TaredFile(File):
 
 
 class ZippedFile(File):
-    def __init__(self, name, zipfile):
+    def __init__(self, name, zipfile, extract_all=False):
         super().__init__(name, [zipfile])
         self.zipfile = zipfile
+        self.extract_all = extract_all
 
     def update(self):
-        unzip_file(self.zipfile.path, self.name)
+        if self.extract_all:
+            unzip_all_files(self.zipfile.path)
+        else:
+            unzip_file(self.zipfile.path, self.name)
 
 
 class GzippedFile(File):
