@@ -7,25 +7,38 @@ from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 import itertools as itt
 from fountain.utils import jpg2npy
+import math
 
+
+BLOCK_SIZE = 1000
+TOTAL_IMAGES = 202600
+TOTAL_BLOCKS = math.ceil(TOTAL_IMAGES / BLOCK_SIZE)
 
 class CelebA(Dataset):
+    def __init__(self, num_blocks=10):
+        super().__init__()
+        self.num_blocks = num_blocks
+
     def files(self):
         with sub_path('celeba'):
             jpgs = [ZippedFile('img_align_celeba/{}.jpg'.format(str(i).zfill(6)), OnlineFile('img_align_celeba.zip', 'http://cake.da.inf.ethz.ch:8080/img_align_celeba.zip'), extract_all=True) for i in range(1, 202600)]
-            files = [self.CelebADataFile('celeba_images.npy', jpgs, False), self.CelebADataFile('celeba_labels.npy', [OnlineFile('list_attr_celeba.txt', 'http://cake.da.inf.ethz.ch:8080/list_attr_celeba.txt')], True)]
+            tuples = [(self.CelebADataFile('celeba_images_{}.npy'.format(b), jpgs, False, b), self.CelebADataFile('celeba_labels_{}.npy'.format(b), [OnlineFile('list_attr_celeba.txt', 'http://cake.da.inf.ethz.ch:8080/list_attr_celeba.txt')], True, b)) for b in range(TOTAL_BLOCKS)]
+            files = list(itt.chain.from_iterable(tuples))
             return files
 
     def get_data_raw(self):
-        files = self.files()
-        images = np.load(files[0].path)
-        labels = np.load(files[1].path)
+        files = self.files()[:self.num_blocks]
+        npys = [np.load(f.path) for f in files]
+        images = npys[0::2]
+        labels = npys[1::2]
+        images, labels = map(np.concatenate, (images, labels))
         return images, labels
 
     class CelebADataFile(File):
-        def __init__(self, name, deps, isLabels):
+        def __init__(self, name, deps, isLabels, block):
             super().__init__(name, deps)
             self.isLabels = isLabels
+            self.block = block
 
         def update(self):
             if self.isLabels:

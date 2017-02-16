@@ -7,6 +7,7 @@ import os.path
 import time
 from PIL import Image
 import numpy as np
+import itertools as itt
 
 
 def download_file(url, fn):
@@ -54,3 +55,15 @@ class Embedder:
 def jpg2npy(path):
     img = Image.open(path)
     return np.array(img)
+
+
+def to_chunks(iterable, chunk_size):
+    it = iter(iterable)
+    chunk = list(itt.islice(it, chunk_size))
+    while(chunk):
+        yield chunk
+        chunk = list(itt.islice(it, chunk_size))
+
+
+def get_chunk(iterable, chunk_size, chunk_number):
+    return next(itt.islice(iterable, chunk_size * chunk_number, chunk_size * (chunk_number + 1)))
