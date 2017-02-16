@@ -6,7 +6,7 @@ import _pickle as cPickle
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 import itertools as itt
-from fountain.utils import jpg2npy
+from fountain.utils import jpg2npy, to_chunks
 import math
 
 
@@ -22,7 +22,8 @@ class CelebA(Dataset):
     def files(self):
         with sub_path('celeba'):
             jpgs = [ZippedFile('img_align_celeba/{}.jpg'.format(str(i).zfill(6)), OnlineFile('img_align_celeba.zip', 'http://cake.da.inf.ethz.ch:8080/img_align_celeba.zip'), extract_all=True) for i in range(1, 202600)]
-            tuples = [(self.CelebADataFile('celeba_images_{}.npy'.format(b), jpgs, False, b), self.CelebADataFile('celeba_labels_{}.npy'.format(b), [OnlineFile('list_attr_celeba.txt', 'http://cake.da.inf.ethz.ch:8080/list_attr_celeba.txt')], True, b)) for b in range(TOTAL_BLOCKS)]
+            lbls = OnlineFile('list_attr_celeba.txt', 'http://cake.da.inf.ethz.ch:8080/list_attr_celeba.txt')
+            tuples = [(self.CelebADataFile('celeba_images_{}.npy'.format(b), j, False, b), self.CelebADataFile('celeba_labels_{}.npy'.format(b), [lbls], True, b)) for b, j in enumerate(to_chunks(jpgs, BLOCK_SIZE))]
             files = list(itt.chain.from_iterable(tuples))
             return files
 
