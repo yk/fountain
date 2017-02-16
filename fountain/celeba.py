@@ -28,7 +28,7 @@ class CelebA(Dataset):
             return files
 
     def get_data_raw(self):
-        files = self.files()[:self.num_blocks]
+        files = self.files()[:self.num_blocks * 2]
         npys = [np.load(f.path) for f in files]
         images = npys[0::2]
         labels = npys[1::2]
