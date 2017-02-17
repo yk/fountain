@@ -33,6 +33,9 @@ class CelebA(Dataset):
         images = npys[0::2]
         labels = npys[1::2]
         images, labels = map(np.concatenate, (images, labels))
+        labels = labels[:, [0, 2, 5]]
+        labels *= [1, 2, 4]
+        labels = np.sum(labels, axis=1)
         return images, labels
 
     class CelebADataFile(File):
