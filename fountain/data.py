@@ -134,11 +134,11 @@ class Dataset:
         for f in self.files():
             f.ensure_updated(min_mtime)
 
-    def get_data(self):
+    def get_data(self, **kwargs):
         self.ensure_updated()
-        return self.get_data_raw()
+        return self.get_data_raw(**kwargs)
 
-    def get_data_raw(self):
+    def get_data_raw(self, **kwargs):
         raise Exception('Not Implemented')
 
 
