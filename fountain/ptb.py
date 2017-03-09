@@ -17,7 +17,7 @@ class PTB(Dataset):
             filenames = ['ptb.train.txt', 'ptb.valid.txt', 'ptb.test.txt']
             files = [OnlineFile(f, 'https://raw.githubusercontent.com/tomsercu/lstm/master/data/{}'.format(f)) for f in filenames]
             if self.parse:
-                pfiles = [CoreNLPParsedFile(f[:-3] + '.parsed', [f]) for f in files]
+                pfiles = [CoreNLPParsedFile(f.name[:-3] + '.parsed', [f]) for f in files]
                 files.extend(pfiles)
             return files
 
