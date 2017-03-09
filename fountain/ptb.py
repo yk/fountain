@@ -12,12 +12,14 @@ class PTB(Dataset):
             files = [OnlineFile(f, '') for f in filenames]
             return files
 
-    def get_data_raw(self):
+    def get_data_raw(self, only_lines=False):
         sets = []
         for f in self.files():
             with open(f.path) as f:
                 lines = [l.strip().split() for l in f.readlines()]
                 sets.append(lines)
+        if only_lines:
+            return [[" ".join(l) for l in s] for s in sets]
         vocab = [(w, i) for i, w in enumerate(set(itt.chain(*itt.chain(*sets))))]
         vocabf = dict(vocab)
         vocabb = dict([(i, w) for w, i in vocab])
