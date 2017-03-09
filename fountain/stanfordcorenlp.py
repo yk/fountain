@@ -21,7 +21,7 @@ class CoreNLP(Dataset):
 
 class CoreNLPParsedFile(File):
     def __init__(self, name, dependencies):
-        super().__init__(self, name, dependencies)
+        super().__init__(name, dependencies)
         CoreNLP().ensure_updated()
 
     def update(self):
