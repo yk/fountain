@@ -9,7 +9,7 @@ class PTB(Dataset):
     def files(self):
         with sub_path('ptb'):
             filenames = ['ptb.train.txt', 'ptb.valid.txt', 'ptb.test.txt']
-            files = [OnlineFile(f, '') for f in filenames]
+            files = [OnlineFile(f, 'https://raw.githubusercontent.com/tomsercu/lstm/master/data/{}'.format(f)) for f in filenames]
             return files
 
     def get_data_raw(self, only_lines=False):
