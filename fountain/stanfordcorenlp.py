@@ -4,6 +4,7 @@ from fountain.data import *
 import numpy as np
 import _pickle as cPickle
 from corenlp import StanfordCoreNLP
+from tqdm import tqdm
 
 
 class CoreNLP(Dataset):
@@ -16,6 +17,23 @@ class CoreNLP(Dataset):
     def get_data_raw(self):
         snlp = StanfordCoreNLP(corenlp_path=os.path.dirname(self.files()[0].path))
         return snlp
+
+
+class CoreNLPParsedFile(File):
+    def __init__(self, name, dependencies):
+        super().__init__(self, name, dependencies)
+        CoreNLP().ensure_updated()
+
+    def update(self):
+        cnlp = CoreNLP().get_data_raw()
+        data = []
+        for b in self.dependencies:
+            with open(b.path) as f:
+                with open(self.path, 'w') as rf:
+                    for l in tqdm(f):
+                        r = cnlp.parse(l.strip())
+                        rf.write(r + '\n')
+
 
 if __name__ == '__main__':
     cnlp = CoreNLP().get_data()
