@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 class CoreNLP(Dataset):
     def files(self):
-        with sub_path('stanfordcorenlp'):
+        with sub_path('stanfordcorenlp', relative=False):
             jarfile = ZippedFile('stanford-corenlp-full-2014-08-27/stanford-corenlp-3.4.1.jar', OnlineFile('corenlp.zip', 'http://nlp.stanford.edu/software/stanford-corenlp-full-2014-08-27.zip'), extract_all=True)
             files = [jarfile]
             return files

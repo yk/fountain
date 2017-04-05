@@ -13,10 +13,10 @@ DATA_PATH = BASE_DATA_PATH
 
 
 @contextmanager
-def sub_path(path):
+def sub_path(path, relative=True):
     global DATA_PATH
     _old_dp = DATA_PATH
-    DATA_PATH = os.path.join(_old_dp, path)
+    DATA_PATH = os.path.join(_old_dp if relative else BASE_DATA_PATH, path)
     os.makedirs(DATA_PATH, mode=0o755, exist_ok=True)  # noqa
     yield
     DATA_PATH = _old_dp
