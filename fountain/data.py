@@ -40,6 +40,7 @@ def sub_path(path, relative=True):
         # pass
 
 data_lock = FileLock(os.path.join(BASE_DATA_PATH, 'lock'))
+logging.getLogger('filelock').setLevel(logging.WARNING)
 
 
 
