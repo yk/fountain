@@ -7,6 +7,7 @@ import logging
 import time
 import numpy as np
 from filelock import FileLock
+import tensorflow as tf
 
 BASE_DATA_PATH = os.path.expanduser("~/data")
 DATA_PATH = BASE_DATA_PATH
@@ -128,6 +129,13 @@ class Dataset:
     def name(self):
         return type(self).__name__
 
+    def get_sub_path(self):
+        return self.name().lower()
+
+    def get_path(self):
+        with sub_path(self.get_sub_path()):
+            return DATA_PATH
+
     def files(self):
         raise Exception('Not Implemented')
 
@@ -141,6 +149,22 @@ class Dataset:
 
     def get_data_raw(self, **kwargs):
         raise Exception('Not Implemented')
+
+    def get_filenames(self):
+        self.ensure_updated()
+        return [f.path for f in self.files()]
+
+    def parse_example(self, serialized_example):
+        raise Exception('Not Implemented')
+
+    def create_queue(self, epochs=1, filenames=None):
+        if filenames is None:
+            filenames = self.get_filenames()
+        filename_queue = tf.train.string_input_producer(filenames, num_epochs=epochs)
+        reader = tf.TFRecordReader()
+        _, serialized_example = reader.read(filename_queue)
+        example = self.parse_example(serialized_example)
+        return example
 
 
 if __name__ == '__main__':
