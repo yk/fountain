@@ -12,7 +12,7 @@ class CIFAR10(Dataset):
         super().__init__(mode=mode)
         self.isTf = tfrecord
 
-    def get_size():
+    def get_size(self):
         return 50000 if self.mode == 'train' else 10000
 
     def files(self):

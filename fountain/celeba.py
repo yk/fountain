@@ -25,7 +25,7 @@ class CelebA(Dataset):
         self.num_images = num_blocks * BLOCK_SIZE
         self.start_image = start_block * BLOCK_SIZE
 
-    def get_size():
+    def get_size(self):
         return self.num_blocks * BLOCK_SIZE
 
     def files(self):

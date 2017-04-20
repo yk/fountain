@@ -12,7 +12,7 @@ class SVHN2(Dataset):
         super().__init__(mode=mode)
         self.isTf = tfrecord
 
-    def get_size():
+    def get_size(self):
         return 73257 if self.mode == 'train' else 26032
 
     def files(self):
