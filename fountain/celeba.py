@@ -48,7 +48,7 @@ class CelebA(Dataset):
     class CelebADataFile(File):
         def __init__(self, name, deps, labelsFile, block):
             super().__init__(name, deps)
-            self.isLabels = isLabels
+            self.labelsFile = labelsFile
             self.block = block
 
         def update(self):
@@ -59,7 +59,7 @@ class CelebA(Dataset):
             assert np.max(data) == 255
             assert np.min(data) == 0
 
-            with open(labelsFile.path) as f:
+            with open(self.labelsFile.path) as f:
                 lines = [l.strip().split()[1:] for l in list(f.readlines())[2:]]
                 lines = get_chunk(lines, BLOCK_SIZE, self.block)
             labels = (np.array(lines, dtype=np.int64) + 1) // 2
