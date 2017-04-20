@@ -65,7 +65,7 @@ class CelebA(Dataset):
             labels = (np.array(lines, dtype=np.int64) + 1) // 2
             assert np.max(labels) == 1
             assert np.min(labels) == 0
-            assert len(labels) == NUM_LABELS, str(len(labels))
+            assert labels.shape[1] == NUM_LABELS, str(len(labels))
 
             assert len(data) == len(labels)
             with tf.python_io.TFRecordWriter(self.path) as writer:
