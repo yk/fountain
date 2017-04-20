@@ -136,7 +136,7 @@ class Dataset:
         with sub_path(self.get_sub_path()):
             return DATA_PATH
 
-    def files(self):
+    def files(self, **kwargs):
         raise Exception('Not Implemented')
 
     def ensure_updated(self, min_mtime=0.):

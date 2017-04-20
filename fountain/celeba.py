@@ -37,25 +37,25 @@ class CelebA(Dataset):
                 serialized_example,
                 features={
                     'image_raw': tf.FixedLenFeature([], tf.string),
-                    'labels': tf.FixedLenFeature([], tf.int64),
+                    'labels': tf.FixedLenFeature([NUM_LABELS], tf.int64),
                 })
         image = tf.decode_raw(features['image_raw'], tf.uint8)
-        image = tf.reshape(image.set_shape(np.prod(IMG_SHAPE)), IMG_SHAPE)
+        image.set_shape(np.prod(IMG_SHAPE))
+        image = tf.reshape(image, IMG_SHAPE)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
-        labels = tf.cast(features['labels'], tf.int32).set_shape([NUM_LABELS])
+        labels = tf.cast(features['labels'], tf.int32)
         return image, labels
 
     class CelebADataFile(File):
         def __init__(self, name, deps, labelsFile, block):
-            super().__init__(name, deps)
+            super().__init__(name, deps + [labelsFile])
             self.labelsFile = labelsFile
             self.block = block
 
         def update(self):
             with ThreadPoolExecutor() as ex:
-                mp = ex.map(jpg2npy, [b.path for b in self.dependencies])
+                mp = ex.map(jpg2npy, [b.path for b in self.dependencies[:-1]])
                 data = list(mp)
-            data = np.array(data).astype(np.uint8)
             assert np.max(data) == 255
             assert np.min(data) == 0
 

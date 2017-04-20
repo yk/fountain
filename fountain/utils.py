@@ -54,7 +54,7 @@ class Embedder:
 
 def jpg2npy(path):
     img = Image.open(path)
-    return np.array(img)
+    return np.array(img, dtype=np.uint8)
 
 
 def to_chunks(iterable, chunk_size):
