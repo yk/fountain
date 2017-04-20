@@ -12,6 +12,9 @@ class SVHN2(Dataset):
         super().__init__(mode=mode)
         self.isTf = tfrecord
 
+    def get_size():
+        return 73257 if self.mode == 'train' else 26032
+
     def files(self):
         with sub_path('svhn2'):
             mats = [OnlineFile('svhn_train.mat', 'http://ufldl.stanford.edu/housenumbers/train_32x32.mat'), OnlineFile('svhn_test.mat', 'http://ufldl.stanford.edu/housenumbers/test_32x32.mat')]

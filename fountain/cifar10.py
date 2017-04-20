@@ -12,6 +12,9 @@ class CIFAR10(Dataset):
         super().__init__(mode=mode)
         self.isTf = tfrecord
 
+    def get_size():
+        return 50000 if self.mode == 'train' else 10000
+
     def files(self):
         with sub_path('cifar10'):
             tar = GzippedFile('cifar10.tar', OnlineFile('cifar10.tar.gz', 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'))

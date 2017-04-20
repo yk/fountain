@@ -11,6 +11,9 @@ class MNIST(Dataset):
         super().__init__(mode=mode)
         self.isTf = tfrecord
 
+    def get_size():
+        return 60000 if self.mode == 'train' else 10000
+
     def files(self):
         with sub_path('mnist'):
             filenames = ['train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz', 't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']

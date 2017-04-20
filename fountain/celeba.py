@@ -25,6 +25,9 @@ class CelebA(Dataset):
         self.num_images = num_blocks * BLOCK_SIZE
         self.start_image = start_block * BLOCK_SIZE
 
+    def get_size():
+        return self.num_blocks * BLOCK_SIZE
+
     def files(self):
         with sub_path(self.get_sub_path()):
             jpgs = [ZippedFile('img_align_celeba/{}.jpg'.format(str(i).zfill(6)), OnlineFile('img_align_celeba.zip', 'http://cake.da.inf.ethz.ch:8080/img_align_celeba.zip'), extract_all=True) for i in range(self.start_image + 1, self.start_image + self.num_images + 1)]

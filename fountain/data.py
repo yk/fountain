@@ -136,6 +136,9 @@ class Dataset:
         with sub_path(self.get_sub_path()):
             return DATA_PATH
 
+    def get_size(self):
+        raise Exception('Not Implemented')
+
     def files(self, **kwargs):
         raise Exception('Not Implemented')
 
