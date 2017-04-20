@@ -16,6 +16,7 @@ TOTAL_IMAGES = 202599
 TOTAL_BLOCKS = math.ceil(TOTAL_IMAGES / BLOCK_SIZE)
 NUM_LABELS = 40
 IMG_SHAPE = [218, 178, 3]
+GOOD_LABELS = [0, 2, 5]
 
 class CelebA(Dataset):
     def __init__(self, num_blocks=10, start_block=0):
@@ -47,6 +48,9 @@ class CelebA(Dataset):
         image = tf.reshape(image, IMG_SHAPE)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
         labels = tf.cast(features['labels'], tf.int32)
+        labels = labels[:, [0, 2, 5]]
+        labels *= [1, 2, 4]
+        labels = tf.reduce_sum(labels, axis=1)
         return image, labels
 
     class CelebADataFile(File):
