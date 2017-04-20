@@ -39,7 +39,7 @@ class CelebA(Dataset):
                     'image_raw': tf.FixedLenFeature([], tf.string),
                     'labels': tf.FixedLenFeature([], tf.int64),
                 })
-        image = tf.decode_raw(features['image_raw'], tf.unit8)
+        image = tf.decode_raw(features['image_raw'], tf.uint8)
         image = image.set_shape(IMG_SHAPE)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
         labels = tf.cast(features['labels'], tf.int32)
