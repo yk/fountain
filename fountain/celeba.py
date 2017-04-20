@@ -46,7 +46,7 @@ class CelebA(Dataset):
         image.set_shape(np.prod(IMG_SHAPE))
         image = tf.reshape(image, IMG_SHAPE)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
-        image = tf.image.resize_bilinear(image, [128, 128])
+        image = tf.image.resize_bilinear(image, [128, 128, 3])
         labels = tf.cast(features['labels'], tf.int32)
         return image, labels
 
