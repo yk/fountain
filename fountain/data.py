@@ -123,8 +123,8 @@ class CSVFile(File):
 
 
 class Dataset:
-    def __init__(self):
-        pass
+    def __init__(self, mode=None):
+        self.mode = mode
 
     def name(self):
         return type(self).__name__

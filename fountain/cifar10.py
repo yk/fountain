@@ -8,8 +8,8 @@ import _pickle as cPickle
 IMG_SHAPE = [32, 32, 3]
 
 class CIFAR10(Dataset):
-    def __init__(self, tfrecord=True):
-        super().__init__()
+    def __init__(self, tfrecord=True, mode='train'):
+        super().__init__(mode=mode)
         self.isTf = tfrecord
 
     def files(self):
@@ -19,7 +19,10 @@ class CIFAR10(Dataset):
             if not self.isTf:
                 files = [self.CIFAR10DataFile('cifar10_images.npy', False, batches), self.CIFAR10DataFile('cifar10_labels.npy', True, batches)]
             else:
-                files = [self.CIFAR10DataFile('cifar10.train.tfrecords', None, batches[:-1]), self.CIFAR10DataFile('cifar10.test.tfrecords', None, batches[-1:])]
+                if self.mode == 'train':
+                    files = [self.CIFAR10DataFile('cifar10.train.tfrecords', None, batches[:-1])]
+                else:
+                    files = [self.CIFAR10DataFile('cifar10.test.tfrecords', None, batches[-1:])]
             return files
 
     def get_data_raw(self):

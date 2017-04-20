@@ -7,8 +7,8 @@ import numpy as np
 IMG_SHAPE = [28, 28, 1]
 
 class MNIST(Dataset):
-    def __init__(self, tfrecord=True):
-        super().__init__()
+    def __init__(self, tfrecord=True, mode='train'):
+        super().__init__(mode=mode)
         self.isTf = tfrecord
 
     def files(self):
@@ -19,7 +19,10 @@ class MNIST(Dataset):
             if not self.isTf:
                 files = [self.MNISTDataFile(ubf.name + '.npy', 'labels' in ubf.name, ubf) for ubf in ubytefiles]
             else:
-                files = [self.MNISTDataFile('mnist.train.tfrecords', None, ubytefiles[:2]), self.MNISTDataFile('mnist.test.tfrecords', None, ubytefiles[2:])]
+                if self.mode == 'train':
+                    files = [self.MNISTDataFile('mnist.train.tfrecords', None, ubytefiles[:2])]
+                else:
+                    files = [self.MNISTDataFile('mnist.test.tfrecords', None, ubytefiles[2:])]
             return files
 
     def get_data_raw(self):

@@ -8,8 +8,8 @@ from scipy.io import loadmat
 IMG_SHAPE = [32, 32, 3]
 
 class SVHN2(Dataset):
-    def __init__(self, tfrecord=True):
-        super().__init__()
+    def __init__(self, tfrecord=True, mode='train'):
+        super().__init__(mode=mode)
         self.isTf = tfrecord
 
     def files(self):
@@ -18,7 +18,10 @@ class SVHN2(Dataset):
             if not self.isTf:
                 files = [self.SVHN2DataFile('svhn_images.npy', False, mats), self.SVHN2DataFile('svhn_labels.npy', True, mats)]
             else:
-                files = [self.SVHN2DataFile('svhn.train.tfrecords', None, [mats[0]]), self.SVHN2DataFile('svhn.test.tfrecords', None, [mats[1]])]
+                if self.mode == 'train':
+                    files = [self.SVHN2DataFile('svhn.train.tfrecords', None, [mats[0]])]
+                else:
+                    files = [self.SVHN2DataFile('svhn.test.tfrecords', None, [mats[1]])]
             return files
 
     def get_data_raw(self):
