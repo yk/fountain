@@ -48,9 +48,7 @@ class CelebA(Dataset):
         image = tf.reshape(image, IMG_SHAPE)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
         labels = tf.cast(features['labels'], tf.int32)
-        labels = labels[:, [0, 2, 5]]
-        labels *= [1, 2, 4]
-        labels = tf.reduce_sum(labels, axis=1)
+        labels = labels[:, 0] * 1 + labels[:, 2] * 2 + labels[:, 5] * 4
         return image, labels
 
     class CelebADataFile(File):
