@@ -157,7 +157,7 @@ class Dataset:
     def parse_example(self, serialized_example):
         raise Exception('Not Implemented')
 
-    def create_queue(self, epochs=1, filenames=None):
+    def create_queue(self, epochs=None, filenames=None):
         if filenames is None:
             filenames = self.get_filenames()
         filename_queue = tf.train.string_input_producer(filenames, num_epochs=epochs)
