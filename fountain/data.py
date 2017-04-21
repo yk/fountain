@@ -63,11 +63,12 @@ class File:
     def ensure_updated(self, min_mtime=0.):
         dep_mtimes = [dep.ensure_updated(min_mtime) for dep in self.dependencies] + [0.]
         # wait_for_unlocked()
-        with data_lock:
-            if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)):
-                print('updating {}'.format(self.name))
-                # with data_lock():
-                self.update()
+        if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)): # check without lock to make faster
+            with data_lock:
+                if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)):
+                    print('updating {}'.format(self.name))
+                    # with data_lock():
+                    self.update()
         return self.last_modified()
 
 
