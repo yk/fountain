@@ -19,12 +19,13 @@ IMG_SHAPE = [218, 178, 3]
 GOOD_LABELS = [0, 2, 5]
 
 class CelebA(Dataset):
-    def __init__(self, num_blocks=10, start_block=0):
+    def __init__(self, num_blocks=10, start_block=0, resize=None):
         super().__init__()
         self.num_blocks = num_blocks
         self.start_block = start_block
         self.num_images = num_blocks * BLOCK_SIZE
         self.start_image = start_block * BLOCK_SIZE
+        self.resize = resize
 
     def get_size(self):
         return self.num_blocks * BLOCK_SIZE
@@ -47,6 +48,8 @@ class CelebA(Dataset):
         image.set_shape(np.prod(IMG_SHAPE))
         image = tf.reshape(image, IMG_SHAPE)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
+        if self.resize:
+            image = tf.image.resize_images(image, self.resize)
         labels = tf.cast(features['labels'], tf.int32)
         labels = labels[0] * 1 + labels[2] * 2 + labels[5] * 4
         return image, labels
