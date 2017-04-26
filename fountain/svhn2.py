@@ -7,7 +7,7 @@ from scipy.io import loadmat
 
 IMG_SHAPE = [32, 32, 3]
 
-class SVHN2(Dataset, LabeledImageMixin):
+class SVHN2(LabeledImageMixin, Dataset):
     def __init__(self, tfrecord=True, mode='train'):
         super().__init__(mode=mode)
         self.isTf = tfrecord

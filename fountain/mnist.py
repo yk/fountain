@@ -6,7 +6,7 @@ import numpy as np
 
 IMG_SHAPE = [28, 28, 1]
 
-class MNIST(Dataset, LabeledImageMixin):
+class MNIST(LabeledImageMixin, Dataset):
     def __init__(self, tfrecord=True, mode='train'):
         super().__init__(mode=mode)
         self.isTf = tfrecord
