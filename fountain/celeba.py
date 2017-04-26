@@ -52,8 +52,8 @@ class CelebA(LabeledImageMixin, Dataset):
         image.set_shape(np.prod(img_shape))
         image = tf.reshape(image, img_shape)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
-        if self.resize:
-            image = tf.image.resize_images(image, self.resize)
+        # if self.resize:
+            # image = tf.image.resize_images(image, self.resize)
         labels = tf.cast(features['labels'], tf.int32)
         labels = labels[0] * 1 + labels[2] * 2 + labels[5] * 4
         return image, labels
