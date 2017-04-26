@@ -18,7 +18,7 @@ NUM_LABELS = 40
 IMG_SHAPE = [218, 178, 3]
 GOOD_LABELS = [0, 2, 5]
 
-class CelebA(Dataset):
+class CelebA(Dataset, LabeledImageMixin):
     def __init__(self, num_blocks=10, start_block=0, resize=None):
         super().__init__()
         self.num_blocks = num_blocks

@@ -7,7 +7,7 @@ import _pickle as cPickle
 
 IMG_SHAPE = [32, 32, 3]
 
-class CIFAR10(Dataset):
+class CIFAR10(Dataset, LabeledImageMixin):
     def __init__(self, tfrecord=True, mode='train'):
         super().__init__(mode=mode)
         self.isTf = tfrecord
