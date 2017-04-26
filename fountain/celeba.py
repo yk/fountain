@@ -35,7 +35,7 @@ class CelebA(LabeledImageMixin, Dataset):
         with sub_path(self.get_sub_path()):
             jpgs = [ZippedFile('img_align_celeba/{}.jpg'.format(str(i).zfill(6)), OnlineFile('img_align_celeba.zip', 'http://cake.da.inf.ethz.ch:8080/img_align_celeba.zip'), extract_all=True) for i in range(self.start_image + 1, self.start_image + self.num_images + 1)]
             lbls = OnlineFile('list_attr_celeba.txt', 'http://cake.da.inf.ethz.ch:8080/list_attr_celeba.txt')
-            files = [self.CelebADataFile('celeba_{}{:03d}.tfrecords'.format('{}x{}_'.format(*self.resize) if self.resize else '', b + self.start_block), j, lbls, b + self.start_block, resize) for b, j in enumerate(to_chunks(jpgs, BLOCK_SIZE))]
+            files = [self.CelebADataFile('celeba_{}{:03d}.tfrecords'.format('{}x{}_'.format(*self.resize) if self.resize else '', b + self.start_block), j, lbls, b + self.start_block, self.resize) for b, j in enumerate(to_chunks(jpgs, BLOCK_SIZE))]
             return files
 
     def parse_example(self, serialized_example):
