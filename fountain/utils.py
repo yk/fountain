@@ -52,8 +52,10 @@ class Embedder:
         return self.d.get(key, self.default)
 
 
-def jpg2npy(path):
+def jpg2npy(path, resize=None):
     img = Image.open(path)
+    if resize:
+        img = img.resize(resize, Image.ANTIALIAS)
     return np.array(img, dtype=np.uint8)
 
 

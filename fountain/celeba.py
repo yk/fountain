@@ -7,6 +7,7 @@ from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 import itertools as itt
 from fountain.utils import jpg2npy, to_chunks, get_chunk
+import functools as fct
 import math
 import tensorflow as tf
 
@@ -34,7 +35,7 @@ class CelebA(LabeledImageMixin, Dataset):
         with sub_path(self.get_sub_path()):
             jpgs = [ZippedFile('img_align_celeba/{}.jpg'.format(str(i).zfill(6)), OnlineFile('img_align_celeba.zip', 'http://cake.da.inf.ethz.ch:8080/img_align_celeba.zip'), extract_all=True) for i in range(self.start_image + 1, self.start_image + self.num_images + 1)]
             lbls = OnlineFile('list_attr_celeba.txt', 'http://cake.da.inf.ethz.ch:8080/list_attr_celeba.txt')
-            files = [self.CelebADataFile('celeba_{:03d}.tfrecords'.format(b + self.start_block), j, lbls, b + self.start_block) for b, j in enumerate(to_chunks(jpgs, BLOCK_SIZE))]
+            files = [self.CelebADataFile('celeba_{}{:03d}.tfrecords'.format('{}x{}_'.format(*self.resize) if self.resize else '', b + self.start_block), j, lbls, b + self.start_block, resize) for b, j in enumerate(to_chunks(jpgs, BLOCK_SIZE))]
             return files
 
     def parse_example(self, serialized_example):
@@ -45,8 +46,11 @@ class CelebA(LabeledImageMixin, Dataset):
                     'labels': tf.FixedLenFeature([NUM_LABELS], tf.int64),
                 })
         image = tf.decode_raw(features['image_raw'], tf.uint8)
-        image.set_shape(np.prod(IMG_SHAPE))
-        image = tf.reshape(image, IMG_SHAPE)
+        img_shape = IMG_SHAPE[:]
+        if self.resize:
+            img_shape[:2] = self.resize
+        image.set_shape(np.prod(img_shape))
+        image = tf.reshape(image, img_shape)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
         if self.resize:
             image = tf.image.resize_images(image, self.resize)
@@ -55,14 +59,15 @@ class CelebA(LabeledImageMixin, Dataset):
         return image, labels
 
     class CelebADataFile(File):
-        def __init__(self, name, deps, labelsFile, block):
+        def __init__(self, name, deps, labelsFile, block, resize=None):
             super().__init__(name, deps + [labelsFile])
             self.labelsFile = labelsFile
             self.block = block
+            self.resize = resize
 
         def update(self):
             with ThreadPoolExecutor() as ex:
-                mp = ex.map(jpg2npy, [b.path for b in self.dependencies[:-1]])
+                mp = ex.map(fct.partial(jpg2npy, resize=self.resize), [b.path for b in self.dependencies[:-1]])
                 data = list(mp)
             assert np.max(data) == 255
             assert np.min(data) == 0
