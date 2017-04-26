@@ -167,7 +167,7 @@ class Dataset:
         filename_queue = tf.train.string_input_producer(filenames, num_epochs=epochs)
         reader = tf.TFRecordReader()
         _, serialized_examples = reader.read_up_to(filename_queue, 128)
-        example = tf.map_fn(self.parse_example, serialized_examples)
+        example = tf.map_fn(self.parse_example, serialized_examples, back_prop=False, dtype=(tf.float32, tf.float32, tf.float32))
         # _, serialized_example = reader.read(filename_queue)
         # example = self.parse_example(serialized_example)
         return example
