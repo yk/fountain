@@ -76,7 +76,7 @@ class CIFAR10(LabeledImageMixin, Dataset):
                         with open(b.path, 'rb') as f:
                             ex = cPickle.load(f, encoding='latin1')
                         ds, ls = np.array(ex['data'], np.uint8), np.array(ex['labels'], np.int64)
-                        ds = ds.reshape((-1, 3, 32, 32)).transpose((0, 2, 3, 1)).ravel()
+                        ds = ds.reshape((-1, 3, 32, 32)).transpose((0, 2, 3, 1)).reshape((-1, 32 * 32 * 3))
                         for d, l in zip(ds, ls):
                             image_raw = d.tostring()
                             example = tf.train.Example(features=tf.train.Features(feature={
