@@ -17,7 +17,7 @@ TOTAL_IMAGES = 202599
 TOTAL_BLOCKS = math.ceil(TOTAL_IMAGES / BLOCK_SIZE)
 NUM_LABELS = 40
 IMG_SHAPE = [218, 178, 3]
-GOOD_LABELS = [2, 21, 31]
+GOOD_LABELS = [2, 19, 31]
 
 class CelebA(LabeledImageMixin, Dataset):
     def __init__(self, num_blocks=10, start_block=0, resize=None):
