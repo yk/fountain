@@ -8,6 +8,7 @@ import time
 from PIL import Image
 import numpy as np
 import itertools as itt
+import math
 
 
 def download_file(url, fn):
@@ -52,8 +53,15 @@ class Embedder:
         return self.d.get(key, self.default)
 
 
-def jpg2npy(path, resize=None):
+def jpg2npy(path, resize=None, crop=None):
     img = Image.open(path)
+    if crop:
+        w, h = img.size
+        wc = (w - crop[0]) / 2.
+        hc = (h - crop[1]) / 2.
+        l, r = math.floor(wc), w - math.ceil(wc)
+        t, b = math.floor(hc), h - math.ceil(hc)
+        img = img.crop((l, t, r, b))
     if resize:
         img = img.resize(resize, Image.ANTIALIAS)
     return np.array(img, dtype=np.uint8)

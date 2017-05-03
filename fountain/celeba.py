@@ -20,13 +20,14 @@ IMG_SHAPE = [218, 178, 3]
 GOOD_LABELS = [2, 19, 31]
 
 class CelebA(LabeledImageMixin, Dataset):
-    def __init__(self, num_blocks=10, start_block=0, resize=None):
+    def __init__(self, num_blocks=10, start_block=0, resize=None, crop=None):
         super().__init__()
         self.num_blocks = num_blocks
         self.start_block = start_block
         self.num_images = num_blocks * BLOCK_SIZE
         self.start_image = start_block * BLOCK_SIZE
         self.resize = resize
+        self.crop = crop
 
     def get_size(self):
         return self.num_blocks * BLOCK_SIZE
@@ -35,7 +36,7 @@ class CelebA(LabeledImageMixin, Dataset):
         with sub_path(self.get_sub_path()):
             jpgs = [ZippedFile('img_align_celeba/{}.jpg'.format(str(i).zfill(6)), OnlineFile('img_align_celeba.zip', 'http://cake.da.inf.ethz.ch:8080/img_align_celeba.zip'), extract_all=True) for i in range(self.start_image + 1, self.start_image + self.num_images + 1)]
             lbls = OnlineFile('list_attr_celeba.txt', 'http://cake.da.inf.ethz.ch:8080/list_attr_celeba.txt')
-            files = [self.CelebADataFile('celeba_{}{:03d}.tfrecords'.format('{}x{}_'.format(*self.resize) if self.resize else '', b + self.start_block), j, lbls, b + self.start_block, self.resize) for b, j in enumerate(to_chunks(jpgs, BLOCK_SIZE))]
+            files = [self.CelebADataFile('celeba_{}{}{:03d}.tfrecords'.format('c{}x{}_'.format(*self.crop) if self.crop else '','{}x{}_'.format(*self.resize) if self.resize else '', b + self.start_block), j, lbls, b + self.start_block, self.resize, self.crop) for b, j in enumerate(to_chunks(jpgs, BLOCK_SIZE))]
             return files
 
     def parse_example(self, serialized_example):
@@ -59,15 +60,16 @@ class CelebA(LabeledImageMixin, Dataset):
         return image, labels
 
     class CelebADataFile(File):
-        def __init__(self, name, deps, labelsFile, block, resize=None):
+        def __init__(self, name, deps, labelsFile, block, resize=None, crop=None):
             super().__init__(name, deps + [labelsFile])
             self.labelsFile = labelsFile
             self.block = block
             self.resize = resize
+            self.crop = crop
 
         def update(self):
             with ThreadPoolExecutor() as ex:
-                mp = ex.map(fct.partial(jpg2npy, resize=self.resize), [b.path for b in self.dependencies[:-1]])
+                mp = ex.map(fct.partial(jpg2npy, resize=self.resize, crop=self.crop), [b.path for b in self.dependencies[:-1]])
                 data = list(mp)
             assert np.max(data) == 255
             assert np.min(data) == 0
@@ -92,4 +94,5 @@ class CelebA(LabeledImageMixin, Dataset):
 
 if __name__ == '__main__':
     with tf.Graph().as_default():
-        print(CelebA().create_queue())
+        print(CelebA(200, resize=[32, 32], crop=[108, 108]).create_queue())
+        print(CelebA(200, resize=[64, 64], crop=[108, 108]).create_queue())
