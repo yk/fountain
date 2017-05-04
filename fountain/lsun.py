@@ -87,7 +87,7 @@ class LSUN(LabeledImageMixin, Dataset):
 
             assert len(data) == len(labels)
             with tf.python_io.TFRecordWriter(self.path) as writer:
-                for d, l in zip(data, label):
+                for d, l in zip(data, labels):
                     image_raw = d.tostring()
                     example = tf.train.Example(features=tf.train.Features(feature={
                         'image_raw': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_raw])),
