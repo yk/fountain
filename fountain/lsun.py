@@ -23,7 +23,7 @@ def get_lsun_category_number(category):
     return CATEGORIES.index(category)
 
 class LSUN(LabeledImageMixin, Dataset):
-    def __init__(self, categories, mode='train', num_blocks=10, start_block=0, resize=None, self.crop=None):
+    def __init__(self, categories, mode='train', num_blocks=10, start_block=0, resize=None, crop=None):
         super().__init__()
         self.categories = categories
         self.num_blocks = num_blocks
