@@ -74,10 +74,10 @@ class LSUN(LabeledImageMixin, Dataset):
             env = lmdb.open('/'.join(db.path.split('/')[:-1]), map_size=1099511627776, max_readers=100, readonly=True)
             with env.begin(write=False) as txn:
                 cursor = txn.cursor()
-                mp = []
+                data = []
                 for k, v in itt.islice(cursor, self.block * BLOCK_SIZE, (self.block + 1) * BLOCK_SIZE):
                     bio = io.BytesIO(v)
-                    mp.append(jpg2npy(bio, resize=self.resize, crop=self.crop))
+                    data.append(jpg2npy(bio, resize=self.resize, crop=self.crop))
             assert np.max(data) == 255
             assert np.min(data) == 0
 
