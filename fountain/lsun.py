@@ -51,14 +51,14 @@ class LSUN(LabeledImageMixin, Dataset):
                 serialized_example,
                 features={
                     'image_raw': tf.FixedLenFeature([], tf.string),
-                    'label': tf.FixedLenFeature([], tf.int64),
+                    'labels': tf.FixedLenFeature([], tf.int64),
                 })
         image = tf.decode_raw(features['image_raw'], tf.uint8)
         img_shape = self.resize + [3]
         image.set_shape(np.prod(img_shape))
         image = tf.reshape(image, img_shape)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
-        label = tf.cast(features['label'], tf.int32)
+        label = tf.cast(features['labels'], tf.int32)
         return image, label
 
     class LSUNDataFile(File):
