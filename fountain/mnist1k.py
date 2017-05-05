@@ -4,14 +4,19 @@ from array import array
 import numpy as np
 
 
-IMG_SHAPE = [28, 28 * 3, 1]
 BLOCK_SIZE = 1000
-TOTAL_IMAGES = 5000000
-TOTAL_BLOCKS = math.ceil(TOTAL_IMAGES / BLOCK_SIZE)
+TOTAL_IMAGES_PER_DIGIT = 5000
+TOTAL_BLOCKS_PER_DIGIT = math.ceil(TOTAL_IMAGES_PER_DIGIT / BLOCK_SIZE)
+DIGIT_WEIGHTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+DIGIT_WEIGHTS = np.array(DIGIT_WEIGHTS) / np.sum(DIGIT_WEIGHTS)
+
+def get_img_shape(num_digits):
+    return [28, 28 * 10 ** num_digits, 1]
 
 class MNIST1K(LabeledImageMixin, Dataset):
-    def __init__(self, num_blocks=10, start_block=0):
+    def __init__(self, num_digits=2, num_blocks=10, start_block=0):
         super().__init__()
+        self.num_digits = 2
         self.num_blocks = num_blocks
         self.start_block = start_block
         self.num_images = num_blocks * BLOCK_SIZE
@@ -25,7 +30,7 @@ class MNIST1K(LabeledImageMixin, Dataset):
             filenames = ['train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz', 't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
             tars = [OnlineFile(fn, 'http://yann.lecun.com/exdb/mnist/' + fn) for fn in filenames]
             ubytefiles = [GzippedFile(f.name[:-3], f) for f in tars]
-            files = [self.MNIST1KDataFile('mnist1k_{:04d}.tfrecords'.format(b), ubytefiles, b) for b in range(self.start_block, self.start_block + self.num_blocks)]
+            files = [self.MNIST1KDataFile('mnist1k_{}_{:04d}.tfrecords'.format(self.num_digits, b), ubytefiles, self.num_digits, b) for b in range(self.start_block, self.start_block + self.num_blocks)]
             return files
 
     def parse_example(self, serialized_example):
@@ -36,15 +41,17 @@ class MNIST1K(LabeledImageMixin, Dataset):
                     'label': tf.FixedLenFeature([], tf.int64),
                 })
         image = tf.decode_raw(features['image_raw'], tf.uint8)
-        image.set_shape(np.prod(IMG_SHAPE))
-        image = tf.reshape(image, IMG_SHAPE)
+        img_shape = get_img_shape(self.num_digits)
+        image.set_shape(np.prod(img_shape))
+        image = tf.reshape(image, img_shape)
         image = tf.cast(image, tf.float32) * (2. / 255) - 1.
         label = tf.cast(features['label'], tf.int32)
         return image, label
 
     class MNIST1KDataFile(File):
-        def __init__(self, name, ubyteFiles, block):
+        def __init__(self, name, ubyteFiles, num_digits, block):
             super().__init__(name, ubyteFiles)
+            self.num_digits = num_digits
             self.block = block
             self.rng = np.random.RandomState(seed=11332244 + block)
 
@@ -78,12 +85,15 @@ class MNIST1K(LabeledImageMixin, Dataset):
         def update(self):
             pure_data = np.concatenate((self.load_images(self.dependencies[0].path), self.load_images(self.dependencies[2].path)))
             pure_labels = np.concatenate((self.load_labels(self.dependencies[1].path), self.load_labels(self.dependencies[3].path)))
-            assert len(data) == len(labels)
+            assert len(pure_data) == len(pure_labels)
+
+            pdbc = [pure_data[pure_labels == c] for c in range(10)]
             data, labels = [], []
             for _ in range(BLOCK_SIZE):
-                inds = self.rng.randint(0, len(data), 3)
-                data.append(np.hstack(pure_data[inds]))
-                labels.append(np.array([100, 10, 1], dtype=np.int64).dot(pure_labels[inds]))
+                lbls = self.rng.choice(10, self.num_digits, True, DIGIT_WEIGHTS)
+                pd = [pdbc[l][self.rng.choice(len(pdbc[l]))] for l in lbls]
+                data.append(np.hstack(pd))
+                labels.append((10 ** np.arange(self.num_digits, dtype=np.int64)).dot(lbls))
 
             with tf.python_io.TFRecordWriter(self.path) as writer:
                 for d, l in zip(data, labels):
@@ -95,4 +105,5 @@ class MNIST1K(LabeledImageMixin, Dataset):
                     writer.write(example.SerializeToString())
 
 if __name__ == '__main__':
-    print(MNIST1K(num_blocks=TOTAL_IMAGES // BLOCK_SIZE).create_queue())
+    print(MNIST1K(num_digits=2, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 100).create_queue())
+    print(MNIST1K(num_digits=3, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 1000).create_queue())

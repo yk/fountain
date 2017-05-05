@@ -94,9 +94,11 @@ class CelebA(LabeledImageMixin, Dataset):
 
 if __name__ == '__main__':
     with tf.Graph().as_default():
-        print(CelebA(200, resize=[32, 32], crop=[108, 108]).create_queue())
-        print(CelebA(200, resize=[64, 64], crop=[108, 108]).create_queue())
-        print(CelebA(200, resize=[32, 32], crop=[138, 138]).create_queue())
-        print(CelebA(200, resize=[64, 64], crop=[138, 138]).create_queue())
+        # print(CelebA(200, resize=[32, 32], crop=[108, 108]).create_queue())
+        # print(CelebA(200, resize=[64, 64], crop=[108, 108]).create_queue())
+        # print(CelebA(200, resize=[32, 32], crop=[138, 138]).create_queue())
+        # print(CelebA(200, resize=[64, 64], crop=[138, 138]).create_queue())
         print(CelebA(200, resize=[32, 32], crop=[118, 118]).create_queue())
+        print(CelebA(200, resize=[128, 128], crop=[118, 118]).create_queue())
+        print(CelebA(200, resize=[128, 128], crop=[118, 118]).create_queue())
         print(CelebA(200, resize=[64, 64], crop=[118, 118]).create_queue())
