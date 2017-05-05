@@ -14,7 +14,8 @@ import lmdb
 import io
 
 
-CATEGORIES = ["bedroom","bridge","church_outdoor","classroom","conference_room","dining_room","kitchen","living_room","restaurant","tower"]
+CATEGORIES = ["bedroom","bridge","dining_room","kitchen","living_room","restaurant","tower"]
+# CATEGORIES = ["bedroom","bridge","church_outdoor","classroom","conference_room","dining_room","kitchen","living_room","restaurant","tower"]
 BLOCK_SIZE = 1000
 TOTAL_IMAGES = [3033042, 818687, 126227, 168103, 229069, 657571, 2212277, 1315802, 626331, 708264]
 TOTAL_BLOCKS = [math.ceil(ti / BLOCK_SIZE) for ti in TOTAL_IMAGES]
@@ -97,5 +98,5 @@ class LSUN(LabeledImageMixin, Dataset):
 
 if __name__ == '__main__':
     with tf.Graph().as_default():
-        print(LSUN(['bedroom', 'kitchen', 'tower'], num_blocks=500, resize=[32, 32]).create_queue())
-        print(LSUN(['bedroom', 'kitchen', 'tower'], num_blocks=500, resize=[64, 64]).create_queue())
+        for s in [32, 64, 128]:
+            print(LSUN(CATEGORIES, num_blocks=500, resize=[s, s]).create_queue())
