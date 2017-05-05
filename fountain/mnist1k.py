@@ -16,11 +16,9 @@ def get_img_shape(num_digits):
 class MNIST1K(LabeledImageMixin, Dataset):
     def __init__(self, num_digits=2, num_blocks=10, start_block=0):
         super().__init__()
-        self.num_digits = 2
+        self.num_digits = num_digits
         self.num_blocks = num_blocks
         self.start_block = start_block
-        self.num_images = num_blocks * BLOCK_SIZE
-        self.start_image = start_block * BLOCK_SIZE
 
     def get_size(self):
         return self.num_blocks * BLOCK_SIZE
