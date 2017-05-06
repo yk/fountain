@@ -7,7 +7,7 @@ import numpy as np
 BLOCK_SIZE = 1000
 TOTAL_IMAGES_PER_DIGIT = 5000
 TOTAL_BLOCKS_PER_DIGIT = math.ceil(TOTAL_IMAGES_PER_DIGIT / BLOCK_SIZE)
-DIGIT_WEIGHTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+DIGIT_WEIGHTS = [1, 1, 1, 1, 3, 10, 30, 100, 300, 1000]
 DIGIT_WEIGHTS = np.array(DIGIT_WEIGHTS) / np.sum(DIGIT_WEIGHTS)
 
 def get_img_shape(num_digits):
@@ -105,4 +105,4 @@ class MNIST1K(LabeledImageMixin, Dataset):
 
 if __name__ == '__main__':
     print(MNIST1K(num_digits=2, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 100).create_queue())
-    print(MNIST1K(num_digits=3, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 1000).create_queue())
+    # print(MNIST1K(num_digits=3, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 1000).create_queue())
