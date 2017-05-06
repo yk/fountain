@@ -82,6 +82,7 @@ class MNIST1K(LabeledImageMixin, Dataset):
 
         def update(self):
             pure_data = np.concatenate((self.load_images(self.dependencies[0].path), self.load_images(self.dependencies[2].path)))
+            pure_data = pure_data.reshape((-1, 28, 28, 1))
             pure_labels = np.concatenate((self.load_labels(self.dependencies[1].path), self.load_labels(self.dependencies[3].path)))
             assert len(pure_data) == len(pure_labels)
 
@@ -104,4 +105,4 @@ class MNIST1K(LabeledImageMixin, Dataset):
 
 if __name__ == '__main__':
     print(MNIST1K(num_digits=2, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 100).create_queue())
-    print(MNIST1K(num_digits=3, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 1000).create_queue())
+    # print(MNIST1K(num_digits=3, num_blocks=TOTAL_BLOCKS_PER_DIGIT * 1000).create_queue())
