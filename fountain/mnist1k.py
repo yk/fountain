@@ -11,7 +11,7 @@ DIGIT_WEIGHTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 DIGIT_WEIGHTS = np.array(DIGIT_WEIGHTS) / np.sum(DIGIT_WEIGHTS)
 
 def get_img_shape(num_digits):
-    return [28, 28 * 10 ** num_digits, 1]
+    return [28, 28 * num_digits, 1]
 
 class MNIST1K(LabeledImageMixin, Dataset):
     def __init__(self, num_digits=2, num_blocks=10, start_block=0):
