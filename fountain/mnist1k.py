@@ -7,7 +7,7 @@ import numpy as np
 BLOCK_SIZE = 1000
 TOTAL_IMAGES_PER_DIGIT = 5000
 TOTAL_BLOCKS_PER_DIGIT = math.ceil(TOTAL_IMAGES_PER_DIGIT / BLOCK_SIZE)
-DIGIT_WEIGHTS = [1, 1, 1, 1, 1, 1, 10, 10, 30, 30]
+DIGIT_WEIGHTS = [1, 1, 1, 1, 1, 5, 5, 5, 5, 5]
 DIGIT_WEIGHTS = np.array(DIGIT_WEIGHTS) / np.sum(DIGIT_WEIGHTS)
 
 def get_img_shape(num_digits):
