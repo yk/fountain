@@ -8,8 +8,11 @@ import time
 import numpy as np
 from filelock import FileLock
 import tensorflow as tf
+from rcfile import rcfile
 
-BASE_DATA_PATH = os.path.expanduser("~/data")
+rcf = rcfile('fountain')
+
+BASE_DATA_PATH = rcf.get('base_data_path', os.path.expanduser("~/data"))
 DATA_PATH = BASE_DATA_PATH
 
 

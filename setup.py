@@ -7,5 +7,5 @@ setup(name='fountain',
         description='Datasets',
         author='yk',
         packages=find_packages(),
-        install_requires=['numpy', 'scipy', 'filelock'],
+        install_requires=['numpy', 'scipy', 'filelock', 'rcfile'],
         )
