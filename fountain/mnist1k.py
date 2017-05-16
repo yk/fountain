@@ -104,5 +104,5 @@ class MNIST1K(LabeledImageMixin, Dataset):
                     writer.write(example.SerializeToString())
 
 if __name__ == '__main__':
-    print(MNIST1K(num_digits=2, num_blocks=400).create_queue())
-    print(MNIST1K(num_digits=3, num_blocks=400).create_queue())
+    # print(MNIST1K(num_digits=2, num_blocks=400).create_queue())
+    print(MNIST1K(num_digits=3, num_blocks=100).create_queue())
