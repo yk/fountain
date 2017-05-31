@@ -9,7 +9,8 @@ IMG_SHAPE = [32, 32, 3]
 
 class SVHN2(LabeledImageMixin, Dataset):
     def __init__(self, tfrecord=True, mode='train'):
-        super().__init__(mode=mode)
+        super().__init__()
+        self.mode = mode
         self.isTf = tfrecord
 
     def get_size(self):

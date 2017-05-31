@@ -9,7 +9,8 @@ IMG_SHAPE = [32, 32, 3]
 
 class CIFAR10(LabeledImageMixin, Dataset):
     def __init__(self, tfrecord=True, mode='train', num_classes=10):
-        super().__init__(mode=mode)
+        super().__init__()
+        self.mode = mode
         self.isTf = tfrecord
         assert num_classes == 10 or num_classes == 100
         self.num_classes = num_classes

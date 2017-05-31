@@ -8,7 +8,8 @@ IMG_SHAPE = [28, 28, 1]
 
 class MNIST(LabeledImageMixin, Dataset):
     def __init__(self, tfrecord=True, mode='train'):
-        super().__init__(mode=mode)
+        super().__init__()
+        self.mode = mode
         self.isTf = tfrecord
 
     def get_size(self):
