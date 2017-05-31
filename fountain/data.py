@@ -164,9 +164,10 @@ class Dataset:
     def get_example_dtype(self):
         raise Exception('Not Implemented')
 
-    def create_queue(self, epochs=None, shuffle=True, read_batch_size=1024):
+    def create_queue(self, epochs=None, read_batch_size=1024):
+        """set read_batch_size to 0 if you only want single examples instead of batches"""
         filenames = self.get_filenames()
-        filename_queue = tf.train.string_input_producer(filenames, num_epochs=epochs, shuffle=shuffle)
+        filename_queue = tf.train.string_input_producer(filenames, num_epochs=epochs, shuffle=True)
         reader = tf.TFRecordReader()
         if read_batch_size == 0: # only read single examples
             _, serialized_example = reader.read(filename_queue)
