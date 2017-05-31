@@ -167,15 +167,13 @@ class Dataset:
     def get_example_dtype(self):
         raise Exception('Not Implemented')
 
-    def create_queue(self, epochs=None, filenames=None, shuffle_filenames=True):
+    def create_queue(self, epochs=None, filenames=None, shuffle_filenames=True, read_batch_size=1024):
         if filenames is None:
             filenames = self.get_filenames()
         filename_queue = tf.train.string_input_producer(filenames, num_epochs=epochs, shuffle=shuffle_filenames)
         reader = tf.TFRecordReader()
-        _, serialized_examples = reader.read_up_to(filename_queue, 1024)
+        _, serialized_examples = reader.read_up_to(filename_queue, read_batch_size)
         example = tf.map_fn(self.parse_example, serialized_examples, back_prop=False, dtype=self.get_example_dtype())
-        # _, serialized_example = reader.read(filename_queue)
-        # example = self.parse_example(serialized_example)
         return example
 
 
