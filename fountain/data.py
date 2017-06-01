@@ -43,7 +43,11 @@ def sub_path(path, relative=True):
     # except:
         # pass
 
-data_lock = FileLock(os.path.join(BASE_DATA_PATH, 'lock'))
+def get_data_lock(fn):
+    # data_lock = FileLock(os.path.join(BASE_DATA_PATH, fn + '.lock'))
+    data_lock = FileLock(os.path.join(BASE_DATA_PATH, 'lock'))
+    return data_lock
+
 logging.getLogger('filelock').setLevel(logging.WARNING)
 
 
@@ -65,10 +69,12 @@ class File:
 
     def ensure_updated(self, min_mtime=0.):
         dep_mtimes = [dep.ensure_updated(min_mtime) for dep in self.dependencies] + [0.]
-        # wait_for_unlocked()
-        if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)): # check without lock to make faster
-            with data_lock:
-                if not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes)):
+        def need_to_update():
+            return not self.exists() or self.last_modified() < max(min_mtime, max(dep_mtimes))
+
+        if need_to_update(): # check without lock to make faster
+            with get_data_lock(self.path):
+                if need_to_update():
                     print('updating {}'.format(self.name))
                     # with data_lock():
                     self.update()
