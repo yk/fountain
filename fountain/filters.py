@@ -50,13 +50,13 @@ class Filters(Dataset):
         features = tf.parse_single_example(
                 serialized_example,
                 features={
-                    'filters_raw': tf.FixedLenFeature([], tf.string),
+                    'filter_raw': tf.FixedLenFeature([], tf.string),
                 })
-        filters = tf.decode_raw(features['filters_raw'], tf.float32)
+        filter = tf.decode_raw(features['filter_raw'], tf.float32)
         eshape = self.get_example_shape()
-        filters.set_shape(np.prod(eshape))
-        filters = tf.reshape(filters, eshape)
-        return filters,
+        filter.set_shape(np.prod(eshape))
+        filter = tf.reshape(filter, eshape)
+        return filter,
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
