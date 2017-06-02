@@ -2,31 +2,38 @@ from fountain.data import *
 import struct
 from array import array
 import numpy as np
+import functools as fct
 
 
 IMG_SHAPE = [28, 28, 1]
 
 class MNIST(LabeledImageMixin, Dataset):
-    def __init__(self, tfrecord=True, mode='train'):
+    def __init__(self, tfrecord=True, mode='train', digits=None):
         super().__init__()
         self.mode = mode
         self.isTf = tfrecord
+        self.digits = list(sorted(digits)) if digits else None
 
     def get_size(self):
         return 60000 if self.mode == 'train' else 10000
 
+    def name(self):
+        if self.digits is None:
+            return super().name()
+        return super().name() + '_' + ''.join(map(str, self.digits))
+
     def files(self):
-        with sub_path('mnist'):
+        with sub_path(self.get_sub_path()):
             filenames = ['train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz', 't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
             tars = [OnlineFile(fn, 'http://yann.lecun.com/exdb/mnist/' + fn) for fn in filenames]
             ubytefiles = [GzippedFile(f.name[:-3], f) for f in tars]
             if not self.isTf:
-                files = [self.MNISTDataFile(ubf.name + '.npy', 'labels' in ubf.name, ubf) for ubf in ubytefiles]
+                files = [self.MNISTDataFile(ubf.name + '.npy', 'labels' in ubf.name, ubf, self.digits) for ubf in ubytefiles]
             else:
                 if self.mode == 'train':
-                    files = [self.MNISTDataFile('mnist.train.tfrecords', None, ubytefiles[:2])]
+                    files = [self.MNISTDataFile(self.name() + '.train.tfrecords', None, ubytefiles[:2], self.digits)]
                 else:
-                    files = [self.MNISTDataFile('mnist.test.tfrecords', None, ubytefiles[2:])]
+                    files = [self.MNISTDataFile(self.name() + '.test.tfrecords', None, ubytefiles[2:], self.digits)]
             return files
 
     def get_data_raw(self):
@@ -50,11 +57,12 @@ class MNIST(LabeledImageMixin, Dataset):
         return image, label
 
     class MNISTDataFile(File):
-        def __init__(self, name, isLabels, ubyteFile):
+        def __init__(self, name, isLabels, ubyteFile, digits):
             self.isTf = name.endswith('tfrecords')
             super().__init__(name, ubyteFile if self.isTf else [ubyteFile])
             self.isLabels = isLabels
             self.ubyteFile = ubyteFile
+            self.digits = digits
 
         # https://github.com/sorki/python-mnist/blob/master/mnist/loader.py
         def load_labels(self, path_lbl):
@@ -97,6 +105,10 @@ class MNIST(LabeledImageMixin, Dataset):
             else:
                 data = self.load_images(self.ubyteFile[0].path)
                 labels = self.load_labels(self.ubyteFile[1].path)
+                if self.digits:
+                    mask = fct.reduce(np.logical_or, [labels == d for d in self.digits], np.zeros_like(labels, dtype=np.bool))
+                    mask = np.flatnonzero(mask)
+                    data, labels = np.asarray(data)[mask], np.asarray(labels)[mask]
 
                 with tf.python_io.TFRecordWriter(self.path) as writer:
                     for d, l in zip(data, labels):
@@ -110,3 +122,4 @@ class MNIST(LabeledImageMixin, Dataset):
 if __name__ == '__main__':
     print(np.max(MNIST(tfrecord=False).get_data()[0][:2]))
     print(MNIST().create_queue())
+    print(MNIST(digits=[2, 7]).create_queue())
