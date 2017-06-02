@@ -33,7 +33,7 @@ class Filters(Dataset):
         return self.num_filters * self.num_blocks
 
     def get_example_dtype(self):
-        return tf.float32
+        return tf.float32,
 
     def get_example_shape(self):
         return (self.filter_width, self.filter_width, 1)
@@ -56,7 +56,7 @@ class Filters(Dataset):
         eshape = self.get_example_shape()
         filters.set_shape(np.prod(eshape))
         filters = tf.reshape(filters, eshape)
-        return filters
+        return filters,
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
