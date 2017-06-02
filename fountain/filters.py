@@ -10,12 +10,13 @@ import glob
 FILTERS_PER_BLOCK = 128
 
 class Filters(Dataset):
-    def __init__(self, num_filters, filter_width, angles, num_blocks=100):
+    def __init__(self, dataset_name, num_filters, filter_width, angles, num_blocks=100):
         super().__init__()
+        self.dataset_name = dataset_name
         self.num_filters = num_filters
         self.filter_width = filter_width
         self.angles = angles
-        infix = '{}_{}_{}'.format(num_filters, filter_width, angles)
+        infix = '{}_{}_{}_{}'.format(dataset_name, num_filters, filter_width, angles)
         self.infix = infix
         self.num_blocks = num_blocks
 
@@ -61,4 +62,4 @@ if __name__ == '__main__':
         src, dst, nf, fw, an = sys.argv[1:]
         Filters(int(nf), int(fw), int(an)).build(src, dst)
     else:
-        print(Filters(128, 7, 8).create_queue())
+        print(Filters('cifar10', 128, 7, 8).create_queue())
