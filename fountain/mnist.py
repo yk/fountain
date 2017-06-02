@@ -18,6 +18,7 @@ class MNIST(LabeledImageMixin, Dataset):
         size = 60000 if self.mode == 'train' else 10000
         if self.digits:
             size = size // 10 * len(self.digits)
+        return size
 
     def name(self):
         if self.digits is None:
