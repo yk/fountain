@@ -32,7 +32,7 @@ class Filters(Dataset):
         return tf.float32,
 
     def get_channels(self):
-        if self.dataset_name == 'mnist':
+        if self.dataset_name.startswith('mnist'):
             return 1
         else:
             return 3
@@ -63,7 +63,7 @@ class Filters(Dataset):
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         src, dst = sys.argv[1:]
-        ds, nf, fw, an = glob.glob('{}/**/logs/filters_{}_*.tfrecords'.format(src, self.infix))[0].split('_')[1:-2]
+        ds, nf, fw, an = glob.glob('{}/**/logs/filters_*.tfrecords'.format(src))[0].rsplit('.', 1)[0].split('_')[1:-1]
         Filters(ds, int(nf), int(fw), int(an)).build(src, dst)
     else:
         print(Filters('cifar10', 128, 7, 8).create_queue())
