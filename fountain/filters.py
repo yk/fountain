@@ -35,8 +35,14 @@ class Filters(Dataset):
     def get_example_dtype(self):
         return tf.float32,
 
+    def get_channels(self):
+        if self.dataset_name == 'mnist':
+            return 1
+        else:
+            return 3
+
     def get_example_shape(self):
-        return (self.filter_width, self.filter_width, 1)
+        return (self.filter_width, self.filter_width, self.get_channels())
 
     def files(self):
         with sub_path(self.get_sub_path()):
