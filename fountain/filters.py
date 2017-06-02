@@ -22,12 +22,8 @@ class Filters(Dataset):
         self.start_block = start_block
 
     def build(self, src, dst):
-        dfmax = max([int(df.strip().rsplit('_', 1)[1].split('.')[0]) for df in glob.glob('{}/filters_{}_*.tfrecords'.format(dst, self.infix))] + [-1])
-        for idx, fn in enumerate(glob.glob('{}/**/logs/filters.tfrecords'.format(src))):
-            nfn = os.path.join(dst, 'filters_{}_{}.tfrecords'.format(self.infix, str(dfmax + idx + 1)))
-            sh.cp(fn, nfn)
-        os.chdir(dst)
-        sh.zip('filters_{}.zip'.format(self.infix), *glob.glob('filters_{}_*.tfrecords'.format(self.infix)))
+        fns = glob.glob('{}/**/logs/filters_{}_*.tfrecords'.format(src, self.infix))
+        sh.zip('-j', os.path.join(dst, 'filters_{}.zip'.format(self.infix)), *fns)
 
     def get_size(self):
         return self.num_filters * self.num_blocks
@@ -66,7 +62,8 @@ class Filters(Dataset):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        src, dst, ds, nf, fw, an = sys.argv[1:]
+        src, dst = sys.argv[1:]
+        ds, nf, fw, an = glob.glob('{}/**/logs/filters_{}_*.tfrecords'.format(src, self.infix))[0].split('_')[1:-2]
         Filters(ds, int(nf), int(fw), int(an)).build(src, dst)
     else:
         print(Filters('cifar10', 128, 7, 8).create_queue())

@@ -15,7 +15,9 @@ class MNIST(LabeledImageMixin, Dataset):
         self.digits = list(sorted(digits)) if digits else None
 
     def get_size(self):
-        return 60000 if self.mode == 'train' else 10000
+        size = 60000 if self.mode == 'train' else 10000
+        if self.digits:
+            size = size // 10 * len(self.digits)
 
     def name(self):
         if self.digits is None:
@@ -109,6 +111,8 @@ class MNIST(LabeledImageMixin, Dataset):
                     mask = fct.reduce(np.logical_or, [labels == d for d in self.digits], np.zeros_like(labels, dtype=np.bool))
                     mask = np.flatnonzero(mask)
                     data, labels = np.asarray(data)[mask], np.asarray(labels)[mask]
+                    for i, l in enumerate(self.digits):
+                        labels[labels == l] = i
 
                 with tf.python_io.TFRecordWriter(self.path) as writer:
                     for d, l in zip(data, labels):
