@@ -42,11 +42,12 @@ class Filters(Dataset):
 
     def files(self):
         with sub_path(self.get_sub_path()):
-            ofn = 'filters_{}.zip'.format(self.infix)
-            zf = OnlineFile(ofn, 'http://cake.da.inf.ethz.ch:8080/' + ofn)
-            fns = ['filters_{}_{}.tfrecords'.format(self.infix, i) for i in range(self.start_block, self.start_block + self.num_blocks)]
-            tfrs = [ZippedFile(fn, zf, True) for fn in fns]
-            return tfrs
+            with sub_path(self.infix):
+                ofn = 'filters_{}.zip'.format(self.infix)
+                zf = OnlineFile(ofn, 'http://cake.da.inf.ethz.ch:8080/' + ofn)
+                fns = ['filters_{}_{}.tfrecords'.format(self.infix, i) for i in range(self.start_block, self.start_block + self.num_blocks)]
+                tfrs = [ZippedFile(fn, zf, True) for fn in fns]
+                return tfrs
 
     def parse_example(self, serialized_example):
         features = tf.parse_single_example(
