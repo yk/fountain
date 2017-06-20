@@ -39,7 +39,7 @@ class ImageNet(LabeledImageMixin, Dataset):
                         batches = [ZippedFile('train_data_batch_{}'.format(b), onl[0], True) for b in range(1, 6)]\
                                 + [ZippedFile('train_data_batch_{}'.format(b), onl[1], True) for b in range(6, 11)]
                     else:
-                        batches = [ZippedFile('test_data_batch_{}'.format(b), onl[0], True) for b in range(1, 11)]
+                        batches = [ZippedFile('train_data_batch_{}'.format(b), onl[0], True) for b in range(1, 11)]
                 else:
                     batches = [ZippedFile('val_data', onl[0], True)]
                 files = [self.ImageNetDataFile('imagenet_{}_{}.tfrecords'.format(self.mode, b), self.width, self.mode, batches, b) for b in range(self.num_blocks)]
