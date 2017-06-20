@@ -22,7 +22,7 @@ class ImageNet(LabeledImageMixin, Dataset):
         return [self.width, self.width, 3]
 
     def get_size(self):
-        return  if self.mode == 'train' else 
+        return self.num_blocks * BLOCK_SIZE
 
     def files(self):
         with sub_path(self.get_sub_path()):
