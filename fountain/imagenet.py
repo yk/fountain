@@ -41,7 +41,7 @@ class ImageNet(LabeledImageMixin, Dataset):
                     batches = [ZippedFile('test_data_{}_batch_{}'.format(self.width, b), onl[0], True) for b in range(1, 11)]
             else:
                 batches = [ZippedFile('val_data_{}'.format(self.width), onl[0], True)]
-            files = [self.ImageNetDataFile('imagenet_{}_{}_{}.tfrecords'.format(self.width, self.mode, b), width, mode, batches, b) for b in range(self.num_blocks)]
+            files = [self.ImageNetDataFile('imagenet_{}_{}_{}.tfrecords'.format(self.width, self.mode, b), self.width, self.mode, batches, b) for b in range(self.num_blocks)]
             return files
 
     def parse_example(self, serialized_example):
