@@ -28,11 +28,11 @@ class ImageNet(LabeledImageMixin, Dataset):
         with sub_path(self.get_sub_path()):
             if self.width == 64 and self.mode == 'train':
                 onl = [
-                        OnlineFile('imagenet_{}_train_1.zip'.format(self.width), 'http://www.image-net.org/image/downsample/Imagenet64_train_part1.zip'),
-                        OnlineFile('imagenet_{}_train_2.zip'.format(self.width), 'http://www.image-net.org/image/downsample/Imagenet64_train_part2.zip')
+                        OnlineFile('imagenet_{}_train_1.zip'.format(self.width), 'http://cake.da.inf.ethz.ch:8080/Imagenet64_train_part1.zip'),
+                        OnlineFile('imagenet_{}_train_2.zip'.format(self.width), 'http://cake.da.inf.ethz.ch:8080/Imagenet64_train_part2.zip')
                         ]
             else:
-                onl = [OnlineFile('imagenet_{}_{}.zip'.format(self.width, self.mode), 'http://www.image-net.org/image/downsample/Imagenet{}_{}.zip'.format(self.width, 'train' if self.mode == 'train' else 'val'))]
+                onl = [OnlineFile('imagenet_{}_{}.zip'.format(self.width, self.mode), 'http://cake.da.inf.ethz.ch:8080/Imagenet{}_{}.zip'.format(self.width, 'train' if self.mode == 'train' else 'val'))]
             if self.mode == 'train':
                 if self.width == 64:
                     batches = [ZippedFile('train_data_{}_batch_{}'.format(self.width, b), onl[0], True) for b in range(1, 6)]\
