@@ -15,7 +15,7 @@ def download_file(url, fn):
     try:
         urllib.request.urlretrieve(url, fn)
     except Exception as e:
-        print(url)
+        print('Cannot retrieve', url)
         raise
 
 
