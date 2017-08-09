@@ -12,7 +12,11 @@ import math
 
 
 def download_file(url, fn):
-    urllib.request.urlretrieve(url, fn)
+    try:
+        urllib.request.urlretrieve(url, fn)
+    except Exception as e:
+        print(url)
+        raise
 
 
 def touch(fn):
@@ -77,3 +81,36 @@ def to_chunks(iterable, chunk_size):
 
 def get_chunk(iterable, chunk_size, chunk_number):
     return list(itt.islice(iterable, chunk_size * chunk_number, chunk_size * (chunk_number + 1)))
+
+
+def create_batch_iterator(create_iter, repeats=-1, batch_size=1, buf_size=None, shuffle=False, trailing_elements=False):
+    if buf_size is None:
+        if shuffle:
+            buf_size = batch_size * 10
+        else:
+            buf_size = batch_size
+
+    assert buf_size >= batch_size
+
+    buf = []
+    idx = 0
+
+    while idx != repeats:
+        idx += 1
+        for el in create_iter():
+            buf.append(el)
+            if len(buf) == buf_size:
+                if shuffle:
+                    random.shuffle(buf)
+                batch = buf[:batch_size]
+                buf = buf[batch_size:]
+                yield batch
+
+    while len(buf) >= batch_size:
+        batch = buf[:batch_size]
+        buf = buf[batch_size:]
+        yield batch
+
+    if trailing_elements:
+        return buf
+

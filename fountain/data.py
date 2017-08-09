@@ -170,6 +170,17 @@ class Dataset:
     def get_example_dtype(self):
         raise Exception('Not Implemented')
 
+    def create_iterator(self):
+        self.ensure_updated()
+        return self._create_iterator()
+
+    def _create_iterator(self):
+        raise Exception('Not Implemented')
+
+
+    def create_batch_iterator(self, epochs, batch_size=1, shuffle=False, buf_size=None, trailing_elements=False):
+        return create_batch_iterator(self.create_iterator, repeats=epochs, batch_size=batch_size, buf_size=buf_size, shuffle=shuffle, trailing_elements=trailing_elements)
+
     def create_queue(self, epochs=None, read_batch_size=1024):
         """set read_batch_size to 0 if you only want single examples instead of batches"""
         filenames = self.get_filenames()
