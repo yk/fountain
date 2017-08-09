@@ -178,7 +178,7 @@ class Dataset:
         raise Exception('Not Implemented')
 
 
-    def create_batch_iterator(self, epochs, batch_size=1, shuffle=False, buf_size=None, trailing_elements=False):
+    def create_batch_iterator(self, epochs=-1, batch_size=1, shuffle=False, buf_size=None, trailing_elements=False):
         return create_batch_iterator(self.create_iterator, repeats=epochs, batch_size=batch_size, buf_size=buf_size, shuffle=shuffle, trailing_elements=trailing_elements)
 
     def create_queue(self, epochs=None, read_batch_size=1024):
