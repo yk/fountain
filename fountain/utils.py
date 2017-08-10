@@ -9,6 +9,7 @@ from PIL import Image
 import numpy as np
 import itertools as itt
 import math
+import random
 
 
 def download_file(url, fn):

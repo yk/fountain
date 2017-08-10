@@ -54,7 +54,8 @@ class ConllDataFile(OnlineFile):
                 if not line:
                     idx += 1
                     if len(block) > 0:
-                        yield block, actions
+                        if len(block) > 1:
+                            yield block, actions
                         block = []
                 elif idx < start_at:
                     continue
@@ -161,6 +162,10 @@ class ConllDataset(Dataset):
         self.ensure_updated()
         return self.files()[0].get_embeddings()
 
+    def get_vocabs(self):
+        self.ensure_updated()
+        return self.files()[1].get_vocabs()
+
     def create_iterator(self):
         vocabs = self.files()[1].get_vocabs()
         lvoc, wvoc = vocabs['label'], vocabs['word']
@@ -197,13 +202,15 @@ class ConllDataset(Dataset):
                     t = block[shift_idx]
                     wid, wct = wvoc.get(t['word'], (0, 0))
                     albl = word_start_idx + wid
+                    idx = shift_idx
                     shift_idx += 1
                 else:
                     lid, lct = lvoc[a['label']]
                     albl = 2 * lid
                     if a['type'] == 'RIGHT_ARC':
                         albl += 1
-                als.append((albl, a))
+                    idx = -1
+                als.append((albl, a, idx))
 
             assert shift_idx == len(block)
 
