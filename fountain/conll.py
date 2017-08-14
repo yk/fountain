@@ -69,9 +69,11 @@ class ConllDataFile(OnlineFile):
                             a2 = a2[:-1].lower()
                             actions.append(dict(type=a1, label=a2))
                 else:
-                    _, word, _, category, tag, morph, head, label, _, _ = map(lambda s: '' if s == '_' else s, line.split())
+                    widx, word, _, category, tag, morph, head, label, _, _ = map(lambda s: '' if s == '_' else s, line.split())
+                    head = int(head) - 1
+                    widx = int(widx) - 1
                     morph = morph.lower().split('|')
-                    token = dict(word=word.lower(), category=category.lower(), tag=tag.lower(), morph=morph, head=int(head), label=label.lower())
+                    token = dict(word=word.lower(), category=category.lower(), tag=tag.lower(), morph=morph, head=head, idx=widx, label=label.lower())
                     block.append(token)
             return block, actions
 
@@ -193,7 +195,7 @@ class ConllDataset(Dataset):
                     else:
                         mid = 0
                     l.append(mid)
-                ls.append((l, tok['head'], label, tok))
+                ls.append((l, tok['idx'], tok['head'], label, tok))
 
             shift_idx = 0
             als = []
