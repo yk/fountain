@@ -48,7 +48,7 @@ class ConllDataFile(OnlineFile):
     def get_iterator(self, start_at=0, min_sentence_length=2, max_sentence_length=-1):
         with open(self.path) as f:
             idx = 0
-            block = []
+            block, actions = [], []
             for line in f:
                 line = line.strip()
                 if not line:
@@ -56,7 +56,7 @@ class ConllDataFile(OnlineFile):
                         if len(block) >= min_sentence_length and (len(block) <= max_sentence_length or max_sentence_length < 0):
                             idx += 1
                             yield block, actions
-                        block = []
+                        block, actions = [], []
                 elif idx < start_at:
                     continue
                 elif line.startswith('T'):
