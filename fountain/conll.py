@@ -48,26 +48,18 @@ class ConllDataFile(OnlineFile):
     def get_iterator(self, start_at=0, min_sentence_length=2, max_sentence_length=-1):
         with open(self.path) as f:
             idx = 0
-            block, actions = [], []
+            block = []
             for line in f:
-                idx += 1
                 line = line.strip()
                 if not line:
-                    if len(block) > 0:
-                        if len(block) >= min_sentence_length and (len(block) <= max_sentence_length or max_sentence_length < 0):
-                            yield block, actions
-                        block, actions = [], []
+                    idx += 1
+                    if len(block) >= min_sentence_length and (len(block) <= max_sentence_length or max_sentence_length < 0):
+                        yield block
+                    block = []
                 elif idx < start_at:
                     continue
                 elif line.startswith('T'):
-                    actions = []
-                    for a in line.split()[2::2]:
-                        if a == 'SHIFT':
-                            actions.append(dict(type='SHIFT', label=None))
-                        else:
-                            a1, a2 = a.split('(')
-                            a2 = a2[:-1].lower()
-                            actions.append(dict(type=a1, label=a2))
+                    continue
                 else:
                     widx, word, _, category, tag, morph, head, label, _, _ = map(lambda s: '' if s == '_' else s, line.split())
                     head = int(head) - 1
@@ -75,7 +67,7 @@ class ConllDataFile(OnlineFile):
                     morph = morph.lower().split('|')
                     token = dict(word=word.lower(), category=category.lower(), tag=tag.lower(), morph=morph, head=head, idx=widx, label=label.lower())
                     block.append(token)
-            return block, actions
+            return block
 
 TOKEN_ATTRS = ('word', 'category', 'tag', 'label')
 MORPH_ATTRS = tuple(map(str.lower, ('fPOS', 'NumType', 'Number', 'Case', 'Gender', 'Person', 'PronType', 'Mood', 'Tense', 'VerbForm', 'Degree', 'Definite', 'Poss', 'Voice', 'Reflex')))
@@ -99,7 +91,7 @@ class VocabsFile(File):
     def update(self):
         known_words = set(self.word_vectors_file.get_word_vectors().vocab.keys())
         vocabs = dict((n, {}) for n in TOKEN_ATTRS + MORPH_ATTRS)
-        for block, actions in self.data_file.get_iterator():
+        for block in self.data_file.get_iterator():
             for tok in block:
                 for a in TOKEN_ATTRS:
                     voc = vocabs[a]
@@ -178,7 +170,7 @@ class ConllDataset(Dataset):
         word_start_idx = 2 * num_labels
 
         data = []
-        for rdidx, (block, actions) in enumerate(self.files()[2].get_iterator(start_at=self.start_at, min_sentence_length=self.min_sentence_length, max_sentence_length=self.max_sentence_length)):
+        for rdidx, block in enumerate(self.files()[2].get_iterator(start_at=self.start_at, min_sentence_length=self.min_sentence_length, max_sentence_length=self.max_sentence_length)):
             if rdidx == self.limit:
                 break
             ls = []
@@ -200,25 +192,10 @@ class ConllDataset(Dataset):
                 ls.append((l, tok['idx'], tok['head'], label, tok))
 
             shift_idx = 0
-            als = []
-            for a in actions:
-                if a['type'] == 'SHIFT':
-                    t = block[shift_idx]
-                    wid, wct = wvoc.get(t['word'], (0, 0))
-                    albl = word_start_idx + wid
-                    idx = shift_idx
-                    shift_idx += 1
-                else:
-                    lid, lct = lvoc[a['label']]
-                    albl = 2 * lid
-                    if a['type'] == 'RIGHT_ARC':
-                        albl += 1
-                    idx = -1
-                als.append((albl, a, idx))
 
             assert shift_idx == len(block)
 
-            yield ls, als
+            yield ls
 
 
 if __name__ == '__main__':
