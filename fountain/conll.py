@@ -191,10 +191,6 @@ class ConllDataset(Dataset):
                     l.append(mid)
                 ls.append((l, tok['idx'], tok['head'], label, tok))
 
-            shift_idx = 0
-
-            assert shift_idx == len(block)
-
             yield ls
 
 
