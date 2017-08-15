@@ -45,16 +45,16 @@ class EmbeddingsFile(File):
 
 
 class ConllDataFile(OnlineFile):
-    def get_iterator(self, start_at=0):
+    def get_iterator(self, start_at=0, min_sentence_length=2, max_sentence_length=-1):
         with open(self.path) as f:
             idx = 0
             block = []
             for line in f:
                 line = line.strip()
                 if not line:
-                    idx += 1
                     if len(block) > 0:
-                        if len(block) > 1:
+                        if len(block) >= min_sentence_length and (len(block) <= max_sentence_length or max_sentence_length < 0):
+                            idx += 1
                             yield block, actions
                         block = []
                 elif idx < start_at:
@@ -134,7 +134,7 @@ class VocabsFile(File):
 
 
 class ConllDataset(Dataset):
-    def __init__(self, name, data_url, word_vectors_url, start_at=0, limit=-1, words_limit=100000):
+    def __init__(self, name, data_url, word_vectors_url, start_at=0, limit=-1, words_limit=100000, min_sentence_length=2, max_sentence_length=-1):
         super().__init__()
         self._name = name
         self.data_url = data_url
@@ -142,6 +142,8 @@ class ConllDataset(Dataset):
         self.start_at = start_at
         self.limit = limit
         self.words_limit = words_limit
+        self.min_sentence_length = min_sentence_length
+        self.max_sentence_length = max_sentence_length
 
     def name(self):
         return self._name
@@ -176,7 +178,7 @@ class ConllDataset(Dataset):
         word_start_idx = 2 * num_labels
 
         data = []
-        for rdidx, (block, actions) in enumerate(self.files()[2].get_iterator(start_at=self.start_at)):
+        for rdidx, (block, actions) in enumerate(self.files()[2].get_iterator(start_at=self.start_at, min_sentence_length=self.min_sentence_length, max_sentence_length=self.max_sentence_length)):
             if rdidx == self.limit:
                 break
             ls = []
