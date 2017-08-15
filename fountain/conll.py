@@ -50,11 +50,11 @@ class ConllDataFile(OnlineFile):
             idx = 0
             block, actions = [], []
             for line in f:
+                idx += 1
                 line = line.strip()
                 if not line:
                     if len(block) > 0:
                         if len(block) >= min_sentence_length and (len(block) <= max_sentence_length or max_sentence_length < 0):
-                            idx += 1
                             yield block, actions
                         block, actions = [], []
                 elif idx < start_at:
