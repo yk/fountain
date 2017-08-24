@@ -45,11 +45,13 @@ class EmbeddingsFile(File):
 
 
 class ConllDataFile(OnlineFile):
-    def get_iterator(self, start_at=0, min_sentence_length=2, max_sentence_length=-1):
+    def get_iterator(self, start_at=0, limit=-1, min_sentence_length=2, max_sentence_length=-1):
         with open(self.path) as f:
             idx = 0
             block = []
             for line in f:
+                if idx == limit:
+                    return
                 line = line.strip()
                 if not line:
                     idx += 1
@@ -64,10 +66,14 @@ class ConllDataFile(OnlineFile):
                     widx, word, _, category, tag, morph, head, label, _, _ = map(lambda s: '' if s == '_' else s, line.split())
                     head = int(head) - 1
                     widx = int(widx) - 1
+                    token = dict(word=word.lower(), category=category.lower(), tag=tag.lower(), head=head, idx=widx, label=label.lower())
                     morph = morph.lower().split('|')
-                    token = dict(word=word.lower(), category=category.lower(), tag=tag.lower(), morph=morph, head=head, idx=widx, label=label.lower())
+                    for m in morph:
+                        mk, mv = m.split('=')
+                        token[mk] = mv
                     block.append(token)
-            return block
+            if len(block) >= min_sentence_length:
+                yield block
 
 TOKEN_ATTRS = ('word', 'category', 'tag', 'label')
 MORPH_ATTRS = tuple(map(str.lower, ('fPOS', 'NumType', 'Number', 'Case', 'Gender', 'Person', 'PronType', 'Mood', 'Tense', 'VerbForm', 'Degree', 'Definite', 'Poss', 'Voice', 'Reflex')))
@@ -101,10 +107,12 @@ class VocabsFile(File):
                     if ta not in voc:
                         voc[ta] = 0
                     voc[ta] += 1
-                for m in tok['morph']:
-                    ma, mv = m.split('=')
-                    voc = vocabs[ma]
-                    if ma not in voc:
+                for m in MORPH_ATTRS:
+                    if m not in tok:
+                        continue
+                    voc = vocabs[m]
+                    mv = tok[m]
+                    if mv not in voc:
                         voc[mv] = 0
                     voc[mv] += 1
 
@@ -163,35 +171,7 @@ class ConllDataset(Dataset):
         return self.files()[1].get_vocabs()
 
     def create_iterator(self):
-        vocabs = self.files()[1].get_vocabs()
-        lvoc, wvoc = vocabs['label'], vocabs['word']
-        num_labels = len(lvoc)
-        num_words = len(wvoc)
-        word_start_idx = 2 * num_labels
-
-        data = []
-        for rdidx, block in enumerate(self.files()[2].get_iterator(start_at=self.start_at, min_sentence_length=self.min_sentence_length, max_sentence_length=self.max_sentence_length)):
-            if rdidx == self.limit:
-                break
-            ls = []
-            for tok in block:
-                l = []
-                for a in TOKEN_ATTRS:
-                    s = tok[a]
-                    sid, sct = vocabs[a].get(s, (0, 0))
-                    if a == 'label':
-                        label = sid
-                    l.append(sid)
-                morph = dict([m.split('=') for m in tok['morph']])
-                for a in MORPH_ATTRS:
-                    if a in morph:
-                        mid, mct = vocabs[a][morph[a]]
-                    else:
-                        mid = 0
-                    l.append(mid)
-                ls.append((l, tok['idx'], tok['head'], label, tok))
-
-            yield ls
+        return self.files()[2].get_iterator(start_at=self.start_at, limit=self.limit, min_sentence_length=self.min_sentence_length, max_sentence_length=self.max_sentence_length)
 
 
 if __name__ == '__main__':
