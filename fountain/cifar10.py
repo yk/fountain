@@ -54,6 +54,7 @@ class CIFAR10(LabeledImageMixin, Dataset):
         image = tf.decode_raw(features['image_raw'], tf.uint8)
         image.set_shape(np.prod(IMG_SHAPE))
         image = tf.reshape(image, IMG_SHAPE)
+        image = tf.cast(image, tf.float32)
         if self.dequant:
             image = image + tf.random_uniform(image.get_shape(), 0., 1.)
             imge = image * (2. / 256) - 1.

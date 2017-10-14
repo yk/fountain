@@ -58,6 +58,7 @@ class LSUN(LabeledImageMixin, Dataset):
         img_shape = self.resize + [3]
         image.set_shape(np.prod(img_shape))
         image = tf.reshape(image, img_shape)
+        image = tf.cast(image, tf.float32)
         if self.dequant:
             image = image + tf.random_uniform(image.get_shape(), 0., 1.)
             imge = image * (2. / 256) - 1.
