@@ -10,13 +10,14 @@ TOTAL_TEST = 50000
 BLOCK_SIZE = 1000
 
 class ImageNet(LabeledImageMixin, Dataset):
-    def __init__(self, mode='train', width=64, num_blocks=None):
+    def __init__(self, mode='train', width=64, num_blocks=None, dequant=True):
         super().__init__()
         self.mode = mode
         self.width = width
         if num_blocks is None:
             num_blocks = TOTAL_TRAIN // BLOCK_SIZE if mode == 'train' else TOTAL_TEST // BLOCK_SIZE
         self.num_blocks = num_blocks
+        self.dequant = dequant
 
     def get_example_shape(self):
         return [self.width, self.width, 3]
@@ -56,7 +57,11 @@ class ImageNet(LabeledImageMixin, Dataset):
         img_shape = self.get_example_shape()
         image.set_shape(np.prod(img_shape))
         image = tf.reshape(image, img_shape)
-        image = tf.cast(image, tf.float32) * (2. / 255) - 1.
+        if self.dequant:
+            image = image + tf.random_uniform(image.get_shape(), 0., 1.)
+            imge = image * (2. / 256) - 1.
+        else:
+            imge = image * (2. / 255) - 1.
         label = tf.cast(features['label'], tf.int32)
         return image, label
 

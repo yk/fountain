@@ -8,11 +8,12 @@ import functools as fct
 IMG_SHAPE = [28, 28, 1]
 
 class MNIST(LabeledImageMixin, Dataset):
-    def __init__(self, tfrecord=True, mode='train', digits=None):
+    def __init__(self, tfrecord=True, mode='train', digits=None, dequant=True):
         super().__init__()
         self.mode = mode
         self.isTf = tfrecord
         self.digits = list(sorted(digits)) if digits else None
+        self.dequant = dequant
 
     def get_size(self):
         size = 60000 if self.mode == 'train' else 10000
@@ -55,7 +56,12 @@ class MNIST(LabeledImageMixin, Dataset):
         image = tf.decode_raw(features['image_raw'], tf.uint8)
         image.set_shape(np.prod(IMG_SHAPE))
         image = tf.reshape(image, IMG_SHAPE)
-        image = tf.cast(image, tf.float32) * (2. / 255) - 1.
+        image = tf.cast(image, tf.float32)
+        if self.dequant:
+            image = image + tf.random_uniform(image.get_shape(), 0., 1.)
+            imge = image * (2. / 256) - 1.
+        else:
+            imge = image * (2. / 255) - 1.
         label = tf.cast(features['label'], tf.int32)
         return image, label
 

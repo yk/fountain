@@ -23,7 +23,7 @@ def get_lsun_category_number(category):
     return CATEGORIES.index(category)
 
 class LSUN(LabeledImageMixin, Dataset):
-    def __init__(self, categories, mode='train', num_blocks=10, start_block=0, resize=None, crop=None):
+    def __init__(self, categories, mode='train', num_blocks=10, start_block=0, resize=None, crop=None, dequant=True):
         super().__init__()
         self.categories = categories
         self.num_blocks = num_blocks
@@ -35,6 +35,7 @@ class LSUN(LabeledImageMixin, Dataset):
         self.resize = resize
         self.crop = crop
         self.mode = mode
+        self.dequant = dequant
 
     def get_size(self):
         return self.num_blocks * BLOCK_SIZE * len(self.categories)
@@ -57,7 +58,11 @@ class LSUN(LabeledImageMixin, Dataset):
         img_shape = self.resize + [3]
         image.set_shape(np.prod(img_shape))
         image = tf.reshape(image, img_shape)
-        image = tf.cast(image, tf.float32) * (2. / 255) - 1.
+        if self.dequant:
+            image = image + tf.random_uniform(image.get_shape(), 0., 1.)
+            imge = image * (2. / 256) - 1.
+        else:
+            imge = image * (2. / 255) - 1.
         label = tf.cast(features['labels'], tf.int32)
         return image, label
 

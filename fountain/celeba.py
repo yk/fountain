@@ -20,7 +20,7 @@ IMG_SHAPE = [218, 178, 3]
 GOOD_LABELS = [2, 20, 21, 31]
 
 class CelebA(LabeledImageMixin, Dataset):
-    def __init__(self, num_blocks=10, start_block=0, resize=None, crop=None):
+    def __init__(self, num_blocks=10, start_block=0, resize=None, crop=None, dequant=True):
         super().__init__()
         self.num_blocks = num_blocks
         self.start_block = start_block
@@ -28,6 +28,7 @@ class CelebA(LabeledImageMixin, Dataset):
         self.start_image = start_block * BLOCK_SIZE
         self.resize = resize
         self.crop = crop
+        self.dequant = dequant
 
     def get_size(self):
         return self.num_blocks * BLOCK_SIZE
@@ -52,7 +53,11 @@ class CelebA(LabeledImageMixin, Dataset):
             img_shape[:2] = self.resize
         image.set_shape(np.prod(img_shape))
         image = tf.reshape(image, img_shape)
-        image = tf.cast(image, tf.float32) * (2. / 255) - 1.
+        if self.dequant:
+            image = image + tf.random_uniform(image.get_shape(), 0., 1.)
+            imge = image * (2. / 256) - 1.
+        else:
+            imge = image * (2. / 255) - 1.
         # if self.resize:
             # image = tf.image.resize_images(image, self.resize)
         labels = tf.cast(features['labels'], tf.int32)

@@ -14,11 +14,12 @@ def get_img_shape(num_digits):
     return [28, 28 * num_digits, 1]
 
 class MNIST1K(LabeledImageMixin, Dataset):
-    def __init__(self, num_digits=2, num_blocks=10, start_block=0):
+    def __init__(self, num_digits=2, num_blocks=10, start_block=0, dequant=True):
         super().__init__()
         self.num_digits = num_digits
         self.num_blocks = num_blocks
         self.start_block = start_block
+        self.dequant = dequant
 
     def get_size(self):
         return self.num_blocks * BLOCK_SIZE
@@ -42,7 +43,11 @@ class MNIST1K(LabeledImageMixin, Dataset):
         img_shape = get_img_shape(self.num_digits)
         image.set_shape(np.prod(img_shape))
         image = tf.reshape(image, img_shape)
-        image = tf.cast(image, tf.float32) * (2. / 255) - 1.
+        if self.dequant:
+            image = image + tf.random_uniform(image.get_shape(), 0., 1.)
+            imge = image * (2. / 256) - 1.
+        else:
+            imge = image * (2. / 255) - 1.
         label = tf.cast(features['label'], tf.int32)
         return image, label
 
