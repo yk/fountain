@@ -61,9 +61,9 @@ class LSUN(LabeledImageMixin, Dataset):
         image = tf.cast(image, tf.float32)
         if self.dequant:
             image = image + tf.random_uniform(image.get_shape(), 0., 1.)
-            imge = image * (2. / 256) - 1.
+            image = image * (2. / 256) - 1.
         else:
-            imge = image * (2. / 255) - 1.
+            image = image * (2. / 255) - 1.
         label = tf.cast(features['labels'], tf.int32)
         return image, label
 
