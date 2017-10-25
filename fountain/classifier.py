@@ -8,6 +8,9 @@ class Classifier:
     def __init__(self, name):
         self.name = name
 
+    def exists():
+        return tf.train.latest_checkpoint(os.path.join(os.path.expanduser('~/models/cls'), self.name)) is not None
+
     def build(self):
         self.filename = tf.train.latest_checkpoint(os.path.join(os.path.expanduser('~/models/cls'), self.name))
         self.saver = tf.train.import_meta_graph(self.filename + '.meta', True, 'extcls')
