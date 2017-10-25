@@ -8,7 +8,7 @@ class Classifier:
     def __init__(self, name):
         self.name = name
 
-    def exists():
+    def exists(self):
         return tf.train.latest_checkpoint(os.path.join(os.path.expanduser('~/models/cls'), self.name)) is not None
 
     def build(self):
