@@ -32,7 +32,10 @@ class MNIST(LabeledImageMixin, Dataset):
             tars = [OnlineFile(fn, 'http://yann.lecun.com/exdb/mnist/' + fn) for fn in filenames]
             ubytefiles = [GzippedFile(f.name[:-3], f) for f in tars]
             if not self.isTf:
-                files = [self.MNISTDataFile(ubf.name + '.npy', 'labels' in ubf.name, ubf, self.digits) for ubf in ubytefiles]
+                if self.mode == 'train':
+                    files = [self.MNISTDataFile(ubf.name + '.npy', 'labels' in ubf.name, ubf, self.digits) for ubf in ubytefiles[:2]]
+                else:
+                    files = [self.MNISTDataFile(ubf.name + '.npy', 'labels' in ubf.name, ubf, self.digits) for ubf in ubytefiles[2:]]
             else:
                 if self.mode == 'train':
                     files = [self.MNISTDataFile(self.name() + '.train.tfrecords', None, ubytefiles[:2], self.digits)]
@@ -42,8 +45,8 @@ class MNIST(LabeledImageMixin, Dataset):
 
     def get_data_raw(self):
         files = self.files()
-        images = np.concatenate((np.load(files[0].path), np.load(files[2].path)))
-        labels = np.concatenate((np.load(files[1].path), np.load(files[3].path)))
+        images = np.load(files[0].path)
+        labels = np.load(files[1].path)
         return images, labels
 
     def parse_example(self, serialized_example):
