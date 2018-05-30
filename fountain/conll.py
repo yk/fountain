@@ -36,7 +36,7 @@ class EmbeddingsFile(File):
         word_embs = wv[words_in_vocab[1:]]
         unk_emb = np.mean(word_embs, 0, keepdims=True)
         embs = np.concatenate((unk_emb, word_embs), 0)
-        kv = KeyedVectors()
+        kv = KeyedVectors(embs.shape[1])
         kv.syn0 = embs
         kv.vocab = dict((k, Vocab(index=v[0], count=v[1])) for k, v in voc.items())
         kv.index2word = words_in_vocab
