@@ -1,6 +1,5 @@
-from fountain.data import *
+from fountain.data import File, OnlineFile, Dataset, sub_path
 import numpy as np
-from hashlib import md5
 import pickle
 from gensim.models.keyedvectors import KeyedVectors, Vocab
 
@@ -43,7 +42,6 @@ class EmbeddingsFile(File):
         kv.save(self.path)
 
 
-
 class ConllDataFile(OnlineFile):
     def get_iterator(self, start_at=0, limit=-1, min_sentence_length=2, max_sentence_length=-1):
         with open(self.path) as f:
@@ -75,10 +73,12 @@ class ConllDataFile(OnlineFile):
             if len(block) >= min_sentence_length:
                 yield block
 
+
 TOKEN_ATTRS = ('word', 'category', 'tag', 'label')
 MORPH_ATTRS = tuple(map(str.lower, ('fPOS', 'NumType', 'Number', 'Case', 'Gender', 'Person', 'PronType', 'Mood', 'Tense', 'VerbForm', 'Degree', 'Definite', 'Poss', 'Voice', 'Reflex')))
 
 ATTRS = TOKEN_ATTRS + MORPH_ATTRS
+
 
 class VocabsFile(File):
     def __init__(self, name, data_file, word_vectors_file, truncate_words=5):
@@ -130,7 +130,6 @@ class VocabsFile(File):
             vocabs = ctvocabs
         with open(self.path, 'wb') as f:
             pickle.dump(vocabs, f)
-
 
 
 class ConllDataset(Dataset):
