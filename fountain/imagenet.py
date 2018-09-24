@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import os
 from fountain.data import *
 import numpy as np
 import _pickle as cPickle
+import scipy.misc
 
 
 TOTAL_TRAIN = 1281167
@@ -10,7 +12,7 @@ TOTAL_TEST = 50000
 BLOCK_SIZE = 1000
 
 class ImageNet(LabeledImageMixin, Dataset):
-    def __init__(self, mode='train', width=64, num_blocks=None, dequant=True):
+    def __init__(self, mode='train', width=64, num_blocks=None, dequant=True, folder=False):
         super().__init__()
         self.mode = mode
         self.width = width
@@ -18,6 +20,7 @@ class ImageNet(LabeledImageMixin, Dataset):
             num_blocks = TOTAL_TRAIN // BLOCK_SIZE if mode == 'train' else TOTAL_TEST // BLOCK_SIZE
         self.num_blocks = num_blocks
         self.dequant = dequant
+        self.folder = folder
 
     def get_example_shape(self):
         return [self.width, self.width, 3]
@@ -44,6 +47,9 @@ class ImageNet(LabeledImageMixin, Dataset):
                 else:
                     batches = [ZippedFile('val_data', onl[0], True)]
                 files = [self.ImageNetDataFile('imagenet_{}_{}.tfrecords'.format(self.mode, b), self.width, self.mode, batches, b) for b in range(self.num_blocks)]
+                if not self.folder:
+                    return files
+                files = [self.ImageNetImageFolder(self.mode, self.mode, files, self.parse_example)]
                 return files
 
     def parse_example(self, serialized_example):
@@ -97,6 +103,42 @@ class ImageNet(LabeledImageMixin, Dataset):
                             }))
                         writer.write(example.SerializeToString())
 
+    class ImageNetImageFolder(File):
+        def __init__(self, name, mode, data_files, parse_fn):
+            super().__init__(name, data_files)
+            self.mode = mode
+            self.parse_fn = parse_fn
+
+        def update(self):
+            os.makedirs(self.path)
+            filename_queue = tf.train.string_input_producer([f.path for f in self.dependencies], num_epochs=1)
+            reader = tf.TFRecordReader()
+            _, serialized_examples = reader.read_up_to(filename_queue, 1024)
+            images, labels = tf.map_fn(self.parse_fn, serialized_examples, dtype=(tf.float32, tf.int32))
+            with tf.Session() as sess:
+                sess.run(tf.global_variables_initializer())
+                sess.run(tf.local_variables_initializer())
+                coord = tf.train.Coordinator()
+                threads = tf.train.start_queue_runners(coord=coord)
+                try:
+                    while True:
+                        images_v, labels_v = sess.run([images, labels])
+                        for image_v, label_v in zip(images_v, labels_v):
+                            img_folder = os.path.join(self.path, str(label_v.item()))
+                            os.makedirs(img_folder, exist_ok=True)
+                            fname = len(os.listdir(img_folder))
+                            img_path = os.path.join(img_folder, '{}.jpg'.format(fname))
+                            image_v += 1.
+                            image_v /= 2.
+                            image_v *= 256.
+                            scipy.misc.imsave(img_path, image_v.astype(np.uint8))
+
+                except tf.errors.OutOfRangeError:
+                    pass
+                coord.request_stop()
+                coord.join(threads)
+
 
 if __name__ == '__main__':
-    print(ImageNet().create_queue())
+    print(ImageNet(num_blocks=4).create_queue())
+    ImageNet(num_blocks=4, folder=True).ensure_updated()
