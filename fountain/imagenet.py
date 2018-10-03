@@ -31,26 +31,31 @@ class ImageNet(LabeledImageMixin, Dataset):
     def files(self):
         with sub_path(self.get_sub_path()):
             with sub_path('{}'.format(self.width)):
-                if self.width == 64 and self.mode == 'train':
-                    onl = [
-                            OnlineFile('imagenet_train_1.zip', 'http://cake.da.inf.ethz.ch:8080/Imagenet64_train_part1.zip'),
-                            OnlineFile('imagenet_train_2.zip', 'http://cake.da.inf.ethz.ch:8080/Imagenet64_train_part2.zip')
-                            ]
+                if self.width == 'tiny':
+                    onl = OnlineFile('tiny-imagenet-200.zip', 'http://cake.da.inf.ethz.ch:8080/tiny-imagenet-200.zip'),
+                    zipd = ZippedFile('words.txt', onl, True)
+                    return [zipd]
                 else:
-                    onl = [OnlineFile('imagenet_{}.zip'.format(self.mode), 'http://cake.da.inf.ethz.ch:8080/Imagenet{}_{}.zip'.format(self.width, 'train' if self.mode == 'train' else 'val'))]
-                if self.mode == 'train':
-                    if self.width == 64:
-                        batches = [ZippedFile('train_data_batch_{}'.format(b), onl[0], True) for b in range(1, 6)]\
-                                + [ZippedFile('train_data_batch_{}'.format(b), onl[1], True) for b in range(6, 11)]
+                    if self.width == 64 and self.mode == 'train':
+                        onl = [
+                                OnlineFile('imagenet_train_1.zip', 'http://cake.da.inf.ethz.ch:8080/Imagenet64_train_part1.zip'),
+                                OnlineFile('imagenet_train_2.zip', 'http://cake.da.inf.ethz.ch:8080/Imagenet64_train_part2.zip')
+                                ]
                     else:
-                        batches = [ZippedFile('train_data_batch_{}'.format(b), onl[0], True) for b in range(1, 11)]
-                else:
-                    batches = [ZippedFile('val_data', onl[0], True)]
-                files = [self.ImageNetDataFile('imagenet_{}_{}.tfrecords'.format(self.mode, b), self.width, self.mode, batches, b) for b in range(self.num_blocks)]
-                if not self.folder:
+                        onl = [OnlineFile('imagenet_{}.zip'.format(self.mode), 'http://cake.da.inf.ethz.ch:8080/Imagenet{}_{}.zip'.format(self.width, 'train' if self.mode == 'train' else 'val'))]
+                    if self.mode == 'train':
+                        if self.width == 64:
+                            batches = [ZippedFile('train_data_batch_{}'.format(b), onl[0], True) for b in range(1, 6)]\
+                                    + [ZippedFile('train_data_batch_{}'.format(b), onl[1], True) for b in range(6, 11)]
+                        else:
+                            batches = [ZippedFile('train_data_batch_{}'.format(b), onl[0], True) for b in range(1, 11)]
+                    else:
+                        batches = [ZippedFile('val_data', onl[0], True)]
+                    files = [self.ImageNetDataFile('imagenet_{}_{}.tfrecords'.format(self.mode, b), self.width, self.mode, batches, b) for b in range(self.num_blocks)]
+                    if not self.folder:
+                        return files
+                    files = [self.ImageNetImageFolder(self.mode, self.mode, files, self.parse_example)]
                     return files
-                files = [self.ImageNetImageFolder(self.mode, self.mode, files, self.parse_example)]
-                return files
 
     def parse_example(self, serialized_example):
         features = tf.parse_single_example(
