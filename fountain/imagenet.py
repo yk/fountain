@@ -33,8 +33,9 @@ class ImageNet(LabeledImageMixin, Dataset):
             with sub_path('{}'.format(self.width)):
                 if self.width == 'tiny':
                     onl = OnlineFile('tiny-imagenet-200.zip', 'http://cake.da.inf.ethz.ch:8080/tiny-imagenet-200.zip')
-                    zipd = ZippedFile('words.txt', onl, True)
-                    return [zipd]
+                    with sub_path('tiny-imagenet-200'):
+                        zipd = ZippedFile('words.txt', onl, True)
+                        return [zipd]
                 else:
                     if self.width == 64 and self.mode == 'train':
                         onl = [
